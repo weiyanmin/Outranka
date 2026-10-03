@@ -112,13 +112,26 @@ Only output valid JSON. Do not wrap in markdown code blocks.
 `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-      },
-    });
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+        },
+      });
+    } catch (modelErr: any) {
+      // Fallback if key does not have preview/specific access for gemini-3.8-flash
+      console.warn('gemini-3.8-flash call failed, trying gemini-2.5-flash fallback:', modelErr.message);
+      response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+        },
+      });
+    }
 
     const responseText = response.text || '';
     const cleanedText = responseText.trim().replace(/^```json/, '').replace(/```$/, '').trim();
