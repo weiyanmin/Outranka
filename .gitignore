@@ -1,0 +1,14 @@
+# Devpost personal learning profile
+/devpost/learner-profile.md
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/

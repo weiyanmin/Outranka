@@ -1,0 +1,23 @@
+{
+  "name": "outranka",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@next/swc-darwin-arm64": "^16.3.8",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "cheerio": "^1.2.0",
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@next/swc-wasm-nodejs": "^16.3.8"
+  }
+}

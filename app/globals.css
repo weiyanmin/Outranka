@@ -1,0 +1,152 @@
+:root {
+  --bg-color: #f8fafc;
+  --text-color: #0f172a;
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
+  --border-color: #e2e8f0;
+  --card-bg: #ffffff;
+  --muted-text: #64748b;
+  --error-bg: #fef2f2;
+  --error-text: #b91c1c;
+  --error-border: #fecaca;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.site-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px 80px 20px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: var(--muted-text);
+  margin-top: 6px;
+}
+
+.form-container {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 6px;
+}
+
+.form-help {
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  margin-top: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent-color);
+}
+
+.toggle-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.toggle-button {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggle-button.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  background: var(--accent-color);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-banner {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
