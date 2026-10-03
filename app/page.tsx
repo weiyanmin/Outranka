@@ -43,17 +43,24 @@ export default function Home() {
   return (
     <div>
       <header className="header">
+        <div className="badge-pill">
+          <span>●</span> AI Search Intent Auditor
+        </div>
         <h1 className="title">Outranka</h1>
         <p className="subtitle">
-          Compare your content against Google&apos;s top 10 results to identify intent gaps and missing topics.
+          Audit your content against Google&apos;s top 10 ranking pages. Uncover search intent gaps and exact missing topics.
         </p>
       </header>
 
       <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
 
       {error && (
-        <div className="error-banner" style={{ marginTop: '24px' }}>
-          <strong>Error: </strong>{error}
+        <div className="error-banner">
+          <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+          <div>
+            <strong>Error: </strong>
+            <span>{error}</span>
+          </div>
         </div>
       )}
 

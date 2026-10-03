@@ -68,10 +68,11 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-container">
+    <form onSubmit={handleSubmit} className="card">
       <div className="form-group">
         <label htmlFor="keyword" className="form-label">
-          Target Keyword
+          <span>Target Keyword</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--muted-text)' }}>Required</span>
         </label>
         <input
           id="keyword"
@@ -81,13 +82,14 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           disabled={isLoading}
+          autoComplete="off"
         />
-        <p className="form-help">The search query your content aims to rank for on Google.</p>
+        <p className="form-help">The primary search term you want your content to rank for.</p>
       </div>
 
       <div className="form-group">
         <label htmlFor="location" className="form-label">
-          Searcher Location
+          <span>Search Region</span>
         </label>
         <select
           id="location"
@@ -102,35 +104,43 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
             </option>
           ))}
         </select>
-        <p className="form-help">Google rankings vary by country. Choose your audience's region.</p>
+        <p className="form-help">Google search results vary by location. Select your target market.</p>
       </div>
 
       <div className="form-group">
-        <label className="form-label">Content Source (Choose One)</label>
-        <div className="toggle-group">
+        <label className="form-label">
+          <span>Your Content Source</span>
+        </label>
+        
+        {/* iOS Segmented Control */}
+        <div className="segmented-control" role="tablist">
           <button
             type="button"
-            className={"toggle-button " + (inputType === 'text' ? 'active' : '')}
+            className={"segment-btn " + (inputType === 'text' ? 'active' : '')}
             onClick={() => setInputType('text')}
             disabled={isLoading}
+            role="tab"
+            aria-selected={inputType === 'text'}
           >
-            Paste Draft Content
+            Paste Draft
           </button>
           <button
             type="button"
-            className={"toggle-button " + (inputType === 'url' ? 'active' : '')}
+            className={"segment-btn " + (inputType === 'url' ? 'active' : '')}
             onClick={() => setInputType('url')}
             disabled={isLoading}
+            role="tab"
+            aria-selected={inputType === 'url'}
           >
-            Target Web Page URL
+            Web Page URL
           </button>
         </div>
 
         {inputType === 'text' ? (
-          <div className="input-subgroup">
+          <div>
             <textarea
               className="form-textarea"
-              rows={8}
+              rows={7}
               placeholder="Paste your blog post, article, or draft content here..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -138,7 +148,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
             />
           </div>
         ) : (
-          <div className="input-subgroup">
+          <div>
             <input
               type="url"
               className="form-input"
@@ -146,16 +156,45 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               disabled={isLoading}
+              autoComplete="off"
             />
           </div>
         )}
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
+      {error && (
+        <div className="error-banner">
+          <span style={{ fontSize: '1rem' }}>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
 
       <button type="submit" className="submit-button" disabled={isLoading}>
-        {isLoading ? 'Analyzing...' : 'Analyze Against Top 10 Results'}
+        {isLoading ? (
+          <>
+            <svg style={{ animation: 'spin 1s linear infinite', width: '18px', height: '18px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
+            Analyzing Competitors...
+          </>
+        ) : (
+          <>
+            Analyze Against Top 10 Results
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </>
+        )}
       </button>
+
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </form>
   );
 }
