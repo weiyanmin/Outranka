@@ -44,7 +44,7 @@ export default function Home() {
     <div>
       <header className="header">
         <div className="badge-pill">
-          <span>●</span> AI Search Intent Auditor
+          <span>●</span> 4-Intent SEO Analyzer
         </div>
         <h1 className="title">Outranka</h1>
         <p className="subtitle">
@@ -66,7 +66,12 @@ export default function Home() {
 
       {analysis && <ResultView analysis={analysis} />}
 
-      {competitors && <CompetitorList competitors={competitors} />}
+      {competitors && (
+        <CompetitorList
+          competitors={competitors}
+          competitorIntents={analysis?.competitorIntents}
+        />
+      )}
     </div>
   );
 }

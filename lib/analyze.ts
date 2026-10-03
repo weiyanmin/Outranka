@@ -1,10 +1,17 @@
 import { GoogleGenAI } from '@google/genai';
 import { PageContent } from './readPage';
 import { SerpResultItem } from './serp';
-import { SCORING_RULES_DESCRIPTION } from './scoring';
+import { SCORING_RULES_DESCRIPTION, SearchIntentCategory } from './scoring';
+
+export interface CompetitorIntentInfo {
+  rank: number;
+  url: string;
+  intentCategory: SearchIntentCategory;
+}
 
 export interface AnalysisResult {
   score: number;
+  intentCategory: SearchIntentCategory;
   keywordIntent: string;
   userPageType: string;
   topPagesType: string;
@@ -27,6 +34,7 @@ export interface AnalysisResult {
     type: string;
     reason: string;
   }[];
+  competitorIntents: CompetitorIntentInfo[];
   competitorsAnalyzedCount: number;
 }
 
@@ -70,11 +78,12 @@ ${SCORING_RULES_DESCRIPTION}
 
 Analyze the user content draft against these competitors. Return a strictly valid JSON object matching this structure:
 {
-  "score": number (integer between 0 and 100 representing overall search intent satisfaction percentage),
-  "keywordIntent": string (description of the searcher's core intent for this query),
+  "score": number (integer 0-100 representing overall search intent satisfaction percentage),
+  "intentCategory": string (MUST BE ONE OF: "Informational", "Commercial", "Transactional", "Navigational"),
+  "keywordIntent": string (1-2 sentence description of the searcher's core intent for this query),
   "userPageType": string (inferred page type of the user content, e.g. "Blog Post / Guide", "Product Page", "Review", "Service Page"),
   "topPagesType": string (dominant page type found in the top Google results),
-  "intentMismatch": boolean (true if user's page type clashes with what Google ranks, e.g. trying to rank a Product page when Google only ranks Blog/Roundup posts),
+  "intentMismatch": boolean (true if user's page type or intent category clashes with what Google ranks),
   "intentMismatchReason": string (clear warning explanation if intentMismatch is true, otherwise empty string),
   "factorScores": {
     "queryRelevance": number (0-100),
@@ -89,7 +98,13 @@ Analyze the user content draft against these competitors. Return a strictly vali
     { "heading": "Heading Title", "description": "What to cover under this section to satisfy user query" }
   ],
   "suggestedSchema": [
-    { "type": "SchemaType (e.g. Article, FAQPage, LocalBusiness, ItemList)", "reason": "Why this schema is recommended based on top competitors" }
+    { "type": "SchemaType", "reason": "Why this schema is recommended based on top competitors" }
+  ],
+  "competitorIntents": [
+    {
+      "rank": number (the competitor position 1-10),
+      "intentCategory": string (ONE OF: "Informational", "Commercial", "Transactional", "Navigational")
+    }
   ]
 }
 
@@ -109,8 +124,26 @@ Only output valid JSON. Do not wrap in markdown code blocks.
     const cleanedText = responseText.trim().replace(/^```json/, '').replace(/```$/, '').trim();
     const parsed = JSON.parse(cleanedText);
 
+    const validIntents: SearchIntentCategory[] = ['Informational', 'Commercial', 'Transactional', 'Navigational'];
+    const sanitizeIntent = (val: any, fallback: SearchIntentCategory = 'Informational'): SearchIntentCategory => {
+      const match = validIntents.find((i) => i.toLowerCase() === String(val).toLowerCase());
+      return match || fallback;
+    };
+
+    const competitorIntents: CompetitorIntentInfo[] = competitorPages.map((c) => {
+      const found = Array.isArray(parsed.competitorIntents)
+        ? parsed.competitorIntents.find((ci: any) => ci.rank === c.serp.position)
+        : null;
+      return {
+        rank: c.serp.position,
+        url: c.serp.link,
+        intentCategory: sanitizeIntent(found?.intentCategory, 'Informational'),
+      };
+    });
+
     return {
       score: Math.min(100, Math.max(0, Math.round(Number(parsed.score) || 0))),
+      intentCategory: sanitizeIntent(parsed.intentCategory, 'Commercial'),
       keywordIntent: parsed.keywordIntent || 'Not determined',
       userPageType: parsed.userPageType || 'General Article',
       topPagesType: parsed.topPagesType || 'Blog Post / Guide',
@@ -127,6 +160,7 @@ Only output valid JSON. Do not wrap in markdown code blocks.
       topRecommendations: Array.isArray(parsed.topRecommendations) ? parsed.topRecommendations : [],
       suggestedStructure: Array.isArray(parsed.suggestedStructure) ? parsed.suggestedStructure : [],
       suggestedSchema: Array.isArray(parsed.suggestedSchema) ? parsed.suggestedSchema : [],
+      competitorIntents,
       competitorsAnalyzedCount: competitorPages.length,
     };
   } catch (err: any) {

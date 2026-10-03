@@ -12,34 +12,63 @@ export default function ResultView({ analysis }: ResultViewProps) {
     return '#f43f5e'; // rose/coral
   };
 
+  const getIntentBadgeColor = (intent: string) => {
+    switch (intent) {
+      case 'Commercial':
+        return { bg: 'rgba(40, 167, 156, 0.12)', color: '#1a776f', border: 'rgba(40, 167, 156, 0.3)' };
+      case 'Informational':
+        return { bg: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', border: 'rgba(2, 132, 199, 0.25)' };
+      case 'Transactional':
+        return { bg: 'rgba(234, 88, 12, 0.1)', color: '#c2410c', border: 'rgba(234, 88, 12, 0.25)' };
+      case 'Navigational':
+      default:
+        return { bg: 'rgba(100, 116, 139, 0.1)', color: '#475569', border: 'rgba(100, 116, 139, 0.2)' };
+    }
+  };
+
+  const intentStyle = getIntentBadgeColor(analysis.intentCategory);
+
   return (
     <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* 1. Primary Score Card */}
       <div className="card" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '0.78rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: 'var(--muted-text)',
-            marginBottom: '4px',
-          }}
-        >
-          Search Intent Satisfaction Score
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+          <span
+            style={{
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'var(--muted-text)',
+            }}
+          >
+            Search Intent Score
+          </span>
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              background: intentStyle.bg,
+              color: intentStyle.color,
+              border: `1px solid ${intentStyle.border}`,
+              padding: '2px 9px',
+              borderRadius: '9999px',
+            }}
+          >
+            {analysis.intentCategory} Intent
+          </span>
         </div>
 
         <div
           style={{
-            fontSize: '4rem',
+            fontSize: '4.2rem',
             fontWeight: 800,
             lineHeight: 1,
             letterSpacing: '-0.04em',
             color: getScoreColor(analysis.score),
-            margin: '12px 0 8px 0',
+            margin: '10px 0 8px 0',
           }}
         >
           {analysis.score}%
@@ -53,7 +82,7 @@ export default function ResultView({ analysis }: ResultViewProps) {
             : 'Significant intent mismatch compared to top ranking competitors.'}
         </p>
 
-        <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginTop: '8px' }}>
+        <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginTop: '8px', lineHeight: 1.4 }}>
           Target Intent: <span style={{ color: 'var(--text-color)', fontWeight: 500 }}>{analysis.keywordIntent}</span>
         </p>
 
@@ -69,7 +98,9 @@ export default function ResultView({ analysis }: ResultViewProps) {
           }}
         >
           <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>Query Relevance (50%)</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
+              {analysis.intentCategory} Intent Match (50%)
+            </span>
             <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
               {analysis.factorScores.queryRelevance}%
             </span>
@@ -119,7 +150,7 @@ export default function ResultView({ analysis }: ResultViewProps) {
               Your Content: <strong>{analysis.userPageType}</strong>
             </span>
             <span style={{ background: '#ffffff', border: '1px solid #fde68a', padding: '4px 10px', borderRadius: '9999px', color: '#92400e' }}>
-              Google Prefers: <strong>{analysis.topPagesType}</strong>
+              Google Prefers: <strong>{analysis.topPagesType} ({analysis.intentCategory})</strong>
             </span>
           </div>
         </div>
