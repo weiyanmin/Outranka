@@ -1,23 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import InputForm, { FormSubmitData } from '../components/InputForm';
-import CompetitorList from '../components/CompetitorList';
-import ResultView from '../components/ResultView';
-import { SerpResultItem } from '../lib/serp';
-import { AnalysisResult } from '../lib/analyze';
+import LoadingSteps from '../components/LoadingSteps';
 
 export default function Home() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [activeKeyword, setActiveKeyword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [competitors, setCompetitors] = useState<SerpResultItem[] | null>(null);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
 
   const handleSubmit = async (data: FormSubmitData) => {
     setIsLoading(true);
+    setActiveKeyword(data.keyword);
     setError(null);
-    setCompetitors(null);
-    setAnalysis(null);
 
     try {
       const res = await fetch('/api/analyze', {
@@ -31,11 +28,22 @@ export default function Home() {
         throw new Error(result.error || 'Failed to fetch search results.');
       }
 
-      setCompetitors(result.competitors);
-      setAnalysis(result.analysis);
+      // Store in sessionStorage for /results route
+      sessionStorage.setItem('outranka_analysis', JSON.stringify(result.analysis));
+      sessionStorage.setItem('outranka_competitors', JSON.stringify(result.competitors));
+      sessionStorage.setItem(
+        'outranka_query',
+        JSON.stringify({
+          keyword: data.keyword,
+          location: data.location,
+          inputType: data.inputType,
+        })
+      );
+
+      // Navigate to dedicated /results page
+      router.push('/results');
     } catch (err: any) {
       setError(err.message || 'Something went wrong while fetching results.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -52,9 +60,13 @@ export default function Home() {
         </p>
       </header>
 
-      <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
+      {isLoading ? (
+        <LoadingSteps keyword={activeKeyword} />
+      ) : (
+        <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
+      )}
 
-      {error && (
+      {error && !isLoading && (
         <div className="error-banner">
           <span style={{ fontSize: '1.1rem' }}>⚠️</span>
           <div>
@@ -62,15 +74,6 @@ export default function Home() {
             <span>{error}</span>
           </div>
         </div>
-      )}
-
-      {analysis && <ResultView analysis={analysis} />}
-
-      {competitors && (
-        <CompetitorList
-          competitors={competitors}
-          competitorIntents={analysis?.competitorIntents}
-        />
       )}
     </div>
   );

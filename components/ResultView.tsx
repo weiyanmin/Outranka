@@ -29,7 +29,7 @@ export default function ResultView({ analysis }: ResultViewProps) {
   const intentStyle = getIntentBadgeColor(analysis.intentCategory);
 
   return (
-    <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* 1. Primary Score Card */}
       <div className="card" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
@@ -207,6 +207,99 @@ export default function ResultView({ analysis }: ResultViewProps) {
           ))}
         </div>
       </div>
+
+      {/* 4. Priority Recommendations */}
+      {analysis.topRecommendations && analysis.topRecommendations.length > 0 && (
+        <div className="card">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '12px' }}>
+            Priority Recommendations to Outrank
+          </h3>
+          <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {analysis.topRecommendations.map((rec, i) => (
+              <li key={i} style={{ fontSize: '0.9rem', color: 'var(--text-color)', lineHeight: 1.45 }}>
+                {rec}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 5. Suggested Content Structure */}
+      {analysis.suggestedStructure && analysis.suggestedStructure.length > 0 && (
+        <div className="card">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '4px' }}>
+            Suggested Content Structure
+          </h3>
+          <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginBottom: '16px' }}>
+            Recommended headings hierarchy aligned with what Google is currently ranking:
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {analysis.suggestedStructure.map((s, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: '12px 14px',
+                  background: '#fafafc',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--accent-color)', marginBottom: '3px' }}>
+                  {s.heading}
+                </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', lineHeight: 1.4 }}>
+                  {s.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 6. Suggested Schema Markup */}
+      {analysis.suggestedSchema && analysis.suggestedSchema.length > 0 && (
+        <div className="card">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '4px' }}>
+            Suggested Schema Markup
+          </h3>
+          <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginBottom: '14px' }}>
+            Structured data types detected on top-performing competitor pages:
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {analysis.suggestedSchema.map((sch, i) => (
+              <div
+                key={i}
+                style={{
+                  background: '#fafafc',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '8px 12px',
+                  fontSize: '0.82rem',
+                }}
+              >
+                <strong style={{ color: 'var(--text-color)' }}>{sch.type}: </strong>
+                <span style={{ color: 'var(--muted-text)' }}>{sch.reason}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 7. Content Strengths */}
+      {analysis.strengths && analysis.strengths.length > 0 && (
+        <div className="card">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '12px' }}>
+            What Your Content Does Well
+          </h3>
+          <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {analysis.strengths.map((str, i) => (
+              <li key={i} style={{ fontSize: '0.9rem', color: '#16a34a', lineHeight: 1.45 }}>
+                <span style={{ color: 'var(--text-color)' }}>{str}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Paste a real draft and check whether the percentage and the missing topics make sense to you as an SEO specialist.
   Commit: `Score content against top 10 with Gemini`
 
-- [ ] **4. A step-by-step loading screen shows progress**
+- [x] **4. A step-by-step loading screen shows progress**
   Becomes usable: While analyzing, a polished loading screen shows each step with detail text instead of a frozen page.
   Why now: Slice 3 is slow enough that the loading screen is now clearly needed, and the steps are real to report.
   PRD ref: `prd.md > The Core Journey` (step 4), `prd.md > States and Boundaries`
@@ -49,7 +49,7 @@ Build mode: fast
   Learner check: Run an analysis and say whether the loading screen feels polished and the step texts make sense.
   Commit: `Add step-by-step loading screen`
 
-- [ ] **5. The full result page shows every section**
+- [x] **5. The full result page shows every section**
   Becomes usable: The result page in the PRD order: score, recommendations and improvements, strengths and gaps, intent mismatch warning, recommended topics, suggested structure, suggested schema, and the top 10 competitor list.
   Why now: The data for all sections already comes from the same AI response; this makes it visible once the core path is trusted.
   PRD ref: `prd.md > Result Screen Contents (in order)`
@@ -59,7 +59,7 @@ Build mode: fast
   Learner check: Read the whole result page as a client would and tell me what is missing, confusing or wrong.
   Commit: `Render full result page`
 
-- [ ] **6. You can download the analysis and errors are graceful**
+- [x] **6. You can download the analysis and errors are graceful**
   Becomes usable: A Download button saves the analysis as a Markdown file, and failures show plain messages with a Try again option.
   Why now: These are the finishing behaviors that make the demo safe and complete.
   PRD ref: `prd.md > Features and Behavior` (download), `prd.md > States and Boundaries`
