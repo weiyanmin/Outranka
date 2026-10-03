@@ -2,12 +2,37 @@
 
 import React, { useState } from 'react';
 import InputForm, { FormSubmitData } from '../components/InputForm';
+import CompetitorList from '../components/CompetitorList';
+import { SerpResultItem } from '../lib/serp';
 
 export default function Home() {
-  const [submittedData, setSubmittedData] = useState<FormSubmitData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [competitors, setCompetitors] = useState<SerpResultItem[] | null>(null);
 
-  const handleSubmit = (data: FormSubmitData) => {
-    setSubmittedData(data);
+  const handleSubmit = async (data: FormSubmitData) => {
+    setIsLoading(true);
+    setError(null);
+    setCompetitors(null);
+
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || 'Failed to fetch search results.');
+      }
+
+      setCompetitors(result.competitors);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong while fetching results.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -19,16 +44,15 @@ export default function Home() {
         </p>
       </header>
 
-      <InputForm onSubmit={handleSubmit} />
+      <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
 
-      {submittedData && (
-        <div style={{ marginTop: '24px', padding: '16px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-          <p style={{ fontWeight: 600, color: '#0f172a' }}>Form validated successfully:</p>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '4px' }}>
-            Keyword: <strong>{submittedData.keyword}</strong> | Location: <strong>{submittedData.location}</strong> | Type: <strong>{submittedData.inputType}</strong>
-          </p>
+      {error && (
+        <div className="error-banner" style={{ marginTop: '24px' }}>
+          <strong>Error: </strong>{error}
         </div>
       )}
+
+      {competitors && <CompetitorList competitors={competitors} />}
     </div>
   );
 }
