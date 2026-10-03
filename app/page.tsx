@@ -3,17 +3,21 @@
 import React, { useState } from 'react';
 import InputForm, { FormSubmitData } from '../components/InputForm';
 import CompetitorList from '../components/CompetitorList';
+import ResultView from '../components/ResultView';
 import { SerpResultItem } from '../lib/serp';
+import { AnalysisResult } from '../lib/analyze';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [competitors, setCompetitors] = useState<SerpResultItem[] | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
 
   const handleSubmit = async (data: FormSubmitData) => {
     setIsLoading(true);
     setError(null);
     setCompetitors(null);
+    setAnalysis(null);
 
     try {
       const res = await fetch('/api/analyze', {
@@ -28,6 +32,7 @@ export default function Home() {
       }
 
       setCompetitors(result.competitors);
+      setAnalysis(result.analysis);
     } catch (err: any) {
       setError(err.message || 'Something went wrong while fetching results.');
     } finally {
@@ -51,6 +56,8 @@ export default function Home() {
           <strong>Error: </strong>{error}
         </div>
       )}
+
+      {analysis && <ResultView analysis={analysis} />}
 
       {competitors && <CompetitorList competitors={competitors} />}
     </div>
