@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { SerpResultItem } from '../lib/serp';
 import { CompetitorIntentInfo } from '../lib/analyze';
 import { SearchIntentCategory } from '../lib/scoring';
@@ -9,6 +11,8 @@ interface CompetitorListProps {
 }
 
 export default function CompetitorList({ competitors, competitorIntents }: CompetitorListProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!competitors || competitors.length === 0) {
     return null;
   }
@@ -49,19 +53,22 @@ export default function CompetitorList({ competitors, competitorIntents }: Compe
     }
   };
 
+  const displayedCompetitors = isExpanded ? competitors : competitors.slice(0, 3);
+  const remainingCount = Math.max(0, competitors.length - 3);
+
   return (
     <div style={{ marginTop: '28px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', padding: '0 4px' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
-          Top 10 Google Competitors
+          Top {isExpanded ? competitors.length : '3'} Competitors
         </h3>
         <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '3px 8px', borderRadius: '6px' }}>
-          {competitors.length} Ranked Pages
+          Showing {displayedCompetitors.length} of {competitors.length}
         </span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {competitors.map((item) => {
+        {displayedCompetitors.map((item) => {
           const intent = getIntentCategory(item.position, item.link);
           const badgeStyle = intent ? getIntentBadgeStyle(intent) : null;
 
@@ -156,6 +163,54 @@ export default function CompetitorList({ competitors, competitorIntents }: Compe
           );
         })}
       </div>
+
+      {competitors.length > 3 && (
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: '#ffffff',
+              color: 'var(--accent-color)',
+              border: '1px solid var(--border-color)',
+              padding: '10px 20px',
+              borderRadius: '9999px',
+              fontSize: '0.88rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.borderColor = 'var(--accent-color)';
+              e.currentTarget.style.background = 'var(--accent-light)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-color)';
+              e.currentTarget.style.background = '#ffffff';
+            }}
+          >
+            {isExpanded ? (
+              <>
+                Show Less
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </>
+            ) : (
+              <>
+                See More ({remainingCount} more competitors)
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
