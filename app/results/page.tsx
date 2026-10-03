@@ -81,7 +81,7 @@ export default function ResultsPage() {
   }
 
   return (
-    <div>
+    <div className="results-container">
       {/* Top Navigation & Action Bar */}
       <div
         style={{

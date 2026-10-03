@@ -49,7 +49,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="home-container">
       <header className="header">
         <div className="badge-pill">
           <span>●</span> 4-Intent SEO Analyzer
