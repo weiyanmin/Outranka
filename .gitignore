@@ -6,6 +6,9 @@
 .env.*
 !.env.example
 
+# OS metadata
+.DS_Store
+
 # Dependencies
 node_modules/
 

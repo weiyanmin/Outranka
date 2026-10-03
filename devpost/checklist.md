@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. You can open Outranka and fill in the input form**
+- [x] **1. You can open Outranka and fill in the input form**
   Becomes usable: A running Next.js app showing the input page: keyword, location dropdown (Global plus all countries), a URL or pasted-content toggle, and an Analyze button, in the clean three-color style. Pressing Analyze only validates the input for now.
   Why now: Bootstraps the project and gives every later slice somewhere to land; the visual direction is set once here.
   PRD ref: `prd.md > Input`, `prd.md > Look and Feel`, `prd.md > Screens and Layout`
@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Open the app, try the form, and say whether the look is clean, modern and three colors the way you pictured it.
   Commit: `Add Outranka input form`
 
-- [ ] **2. The top 10 Google results appear for your keyword and location**
+- [x] **2. The top 10 Google results appear for your keyword and location**
   Becomes usable: Press Analyze and see the real top 10 results (position, title, link, snippet) from SerpAPI for the keyword and chosen country.
   Why now: SerpAPI and the secret key setup are the first unfamiliar outside dependency; it is the riskiest unknown, so we prove it before building on it.
   PRD ref: `prd.md > Results and Score`
@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Enter best dirty coffee in Phuket with Global, then with another country, and see whether the top 10 lists differ.
   Commit: `Fetch top 10 results with SerpAPI`
 
-- [ ] **3. You get a score and the missing topics for your content**
+- [x] **3. You get a score and the missing topics for your content**
   Becomes usable: The kernel: with a keyword and your pasted content or URL, the app reads the competitor pages, asks Gemini, and shows the percentage score with the top missing topics.
   Why now: This is the unique kernel and the other big unknown (the AI judge and page reading), so it comes right after search works.
   PRD ref: `prd.md > Results and Score`, `prd.md > Result Screen Contents (in order)` (items 1 and 5)
