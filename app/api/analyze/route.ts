@@ -7,6 +7,7 @@ import {
   analyzeMarkdownOrText,
   evaluateScannabilityAndStructure,
 } from '../../../lib/scannability';
+import { calculateRankingChance } from '../../../lib/rankingChance';
 
 export async function POST(req: NextRequest) {
   try {
@@ -115,6 +116,18 @@ export async function POST(req: NextRequest) {
     analysis.relatedSearches = serpData.relatedSearches || [];
     analysis.peopleAlsoAsk = serpData.peopleAlsoAsk || [];
 
+    // Step 5: Calculate deterministic "Chance of Ranking in Google" score for Top 5 queries
+    const rankingChanceReport = calculateRankingChance(
+      keyword.trim(),
+      userTextContent,
+      analysis,
+      scannabilityAudit,
+      aiOverview,
+      serpData.relatedSearches || [],
+      serpData.peopleAlsoAsk || []
+    );
+    analysis.rankingChanceReport = rankingChanceReport;
+
     // Merge extracted schema types & structural metrics back into the competitor items
     const enrichedCompetitors = competitorPages.map((cp) => ({
       ...cp.serp,
@@ -129,6 +142,7 @@ export async function POST(req: NextRequest) {
       aiOverview,
       relatedSearches: serpData.relatedSearches || [],
       peopleAlsoAsk: serpData.peopleAlsoAsk || [],
+      rankingChanceReport,
     });
   } catch (error: any) {
     return NextResponse.json(

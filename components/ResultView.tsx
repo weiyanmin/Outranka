@@ -2,6 +2,7 @@ import React from 'react';
 import { AnalysisResult } from '../lib/analyze';
 import AiOverviewCard from './AiOverviewCard';
 import RelatedKeywordsCard from './RelatedKeywordsCard';
+import RankingChanceCard from './RankingChanceCard';
 
 interface ResultViewProps {
   analysis: AnalysisResult;
@@ -130,7 +131,12 @@ export default function ResultView({ analysis }: ResultViewProps) {
           </div>
         </div>
 
-        {/* 2. Intent Mismatch Alert Banner */}
+        {/* 2. Your Chance of Ranking in Google Score Card */}
+        {analysis.rankingChanceReport && (
+          <RankingChanceCard report={analysis.rankingChanceReport} />
+        )}
+
+        {/* 3. Intent Mismatch Alert Banner */}
         {analysis.intentMismatch && (
           <div
             style={{

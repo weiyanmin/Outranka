@@ -13,9 +13,21 @@ export function downloadAnalysisMarkdown(
 **Search Intent Type:** ${analysis.intentCategory} Intent  
 **Target Query Intent:** ${analysis.keywordIntent}  
 **Search Intent Satisfaction Score:** ${analysis.score}%  
-
+${analysis.rankingChanceReport ? `**Your Chance of Ranking in Google:** ${analysis.rankingChanceReport.overallRankingChance}% (${analysis.rankingChanceReport.tier})  
+` : ''}
 ---
 
+${analysis.rankingChanceReport ? `## Your Chance of Ranking in Google
+- **Overall Ranking Probability:** ${analysis.rankingChanceReport.overallRankingChance}% (${analysis.rankingChanceReport.tier})
+- **Algorithmic Verdict:** ${analysis.rankingChanceReport.verdict}
+
+### Top 5 Queries Ranking Probability Breakdown:
+${analysis.rankingChanceReport.topQueries.map((q, i) => `${i + 1}. **"${q.query}"**: **${q.chanceScore}%** [${q.tier}]
+   - Key Advantage: ${q.keyAdvantage}
+   - Action to Rank Higher: ${q.actionToRankHigher}`).join('\n')}
+
+---
+` : ''}
 ## Intent Satisfaction Breakdown
 - **${analysis.intentCategory} Query Relevance (50%):** ${analysis.factorScores.queryRelevance}%
 - **Content Structure (25%):** ${analysis.factorScores.structure}%
@@ -395,6 +407,48 @@ export function downloadAnalysisPdf(
       </div>
     </div>
   </div>
+
+  ${analysis.rankingChanceReport ? `
+  <div class="score-card" style="border-left: 4px solid #28a79c; margin-bottom: 14px; background: #fafafc;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b;">
+          🎯 Your Chance of Ranking in Google (Algorithmic Score)
+        </div>
+        <div style="font-size: 26px; font-weight: 800; color: #28a79c; margin-top: 2px;">
+          ${analysis.rankingChanceReport.overallRankingChance}% <span style="font-size: 12px; font-weight: 700; color: #1e293b;">[${analysis.rankingChanceReport.tier}]</span>
+        </div>
+      </div>
+      <div style="text-align: right; font-size: 11px; color: #64748b; max-width: 320px;">
+        ${analysis.rankingChanceReport.verdict}
+      </div>
+    </div>
+
+    <div style="margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+      <div style="font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Top 5 Queries Probability Breakdown:</div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+        <thead>
+          <tr style="border-bottom: 1px solid #e2e8f0; text-align: left; color: #64748b;">
+            <th style="padding: 4px 6px;">Query</th>
+            <th style="padding: 4px 6px; width: 60px;">Chance</th>
+            <th style="padding: 4px 6px; width: 100px;">Tier</th>
+            <th style="padding: 4px 6px;">Action to Rank Higher</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${analysis.rankingChanceReport.topQueries.map(q => `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 5px 6px; font-weight: 600;">"${q.query}"</td>
+              <td style="padding: 5px 6px; font-weight: 800; color: #28a79c;">${q.chanceScore}%</td>
+              <td style="padding: 5px 6px;"><span class="badge" style="font-size: 8px;">${q.tier}</span></td>
+              <td style="padding: 5px 6px; color: #475569;">${q.actionToRankHigher}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  ` : ''}
 
   ${analysis.intentMismatch ? `
     <div class="mismatch-alert">

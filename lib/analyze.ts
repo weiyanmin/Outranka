@@ -3,6 +3,7 @@ import { PageContent } from './readPage';
 import { SerpResultItem, GoogleAiOverviewData, RelatedSearchItem, PeopleAlsoAskItem } from './serp';
 import { SCORING_RULES_DESCRIPTION, SearchIntentCategory } from './scoring';
 import { DeterministicAuditSummary } from './scannability';
+import { RankingChanceReport } from './rankingChance';
 
 export interface CompetitorIntentInfo {
   rank: number;
@@ -41,6 +42,7 @@ export interface AnalysisResult {
   aiOverview?: GoogleAiOverviewData;
   relatedSearches?: RelatedSearchItem[];
   peopleAlsoAsk?: PeopleAlsoAskItem[];
+  rankingChanceReport?: RankingChanceReport;
 }
 
 export async function analyzeContentWithGemini(
