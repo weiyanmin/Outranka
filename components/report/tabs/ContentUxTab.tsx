@@ -121,8 +121,16 @@ function ScannabilityCheckCard({ chk }: { chk: Check }) {
 }
 
 export default function ContentUxTab({ analysis }: { analysis: AnalysisResult }) {
-  const [filter, setFilter] = React.useState<'all' | 'issues' | 'passing'>('all');
   const audit = analysis.scannabilityAudit;
+  const alerts = audit?.checks.filter((c) => c.status === 'alert') || [];
+  const warnings = audit?.checks.filter((c) => c.status === 'warning') || [];
+  const passes = audit?.checks.filter((c) => c.status === 'pass') || [];
+  const issuesCount = alerts.length + warnings.length;
+
+  // Show issues by default when available, allowing user to toggle to 'all' or 'passing'
+  const [filter, setFilter] = React.useState<'all' | 'issues' | 'passing'>(
+    issuesCount > 0 ? 'issues' : 'all'
+  );
   const strengths = analysis.strengths || [];
 
   if (!audit) {
@@ -137,10 +145,6 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
 
   const u = audit.userMetrics;
   const a = audit.topCompetitorAverages;
-  const alerts = audit.checks.filter((c) => c.status === 'alert');
-  const warnings = audit.checks.filter((c) => c.status === 'warning');
-  const passes = audit.checks.filter((c) => c.status === 'pass');
-  const issuesCount = alerts.length + warnings.length;
 
   const statusRows = [
     { label: 'Passing', count: passes.length, color: COLORS.success },
