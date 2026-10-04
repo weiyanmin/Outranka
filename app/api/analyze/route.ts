@@ -9,6 +9,7 @@ import {
 } from '../../../lib/scannability';
 import { calculateRankingChance } from '../../../lib/rankingChance';
 import { evaluateLanguageAlignment } from '../../../lib/language';
+import { calculateOverallPerformance } from '../../../lib/performanceScore';
 
 export async function POST(req: NextRequest) {
   try {
@@ -144,6 +145,15 @@ export async function POST(req: NextRequest) {
       location || 'global'
     );
     analysis.languageAudit = languageAudit;
+
+    // Step 7: Calculate algorithmic Overall Performance Score combining all audits
+    const overallPerformance = calculateOverallPerformance(
+      analysis,
+      scannabilityAudit,
+      languageAudit,
+      aiOverview
+    );
+    analysis.overallPerformance = overallPerformance;
 
     // Merge extracted schema types, structural metrics & language back into the competitor items
     const enrichedCompetitors = competitorPages.map((cp) => ({

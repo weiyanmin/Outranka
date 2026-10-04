@@ -12,7 +12,14 @@ export function downloadAnalysisMarkdown(
 **Location:** ${query.location}  
 **Search Intent Type:** ${analysis.intentCategory} Intent  
 **Target Query Intent:** ${analysis.keywordIntent}  
-**Search Intent Satisfaction Score:** ${analysis.score}%  
+${analysis.overallPerformance ? `**Overall Performance Score:** ${analysis.overallPerformance.overallScore}% (${analysis.overallPerformance.grade})
+- **Summary:** ${analysis.overallPerformance.summary}
+- **Search Intent Match (35%):** ${analysis.overallPerformance.factors.searchIntent.score}% (${analysis.overallPerformance.factors.searchIntent.label})
+- **UI/UX & Scannability (25%):** ${analysis.overallPerformance.factors.scannabilityUx.score}% (${analysis.overallPerformance.factors.scannabilityUx.label})
+- **Competitive Parity (25%):** ${analysis.overallPerformance.factors.competitiveParity.score}% (${analysis.overallPerformance.factors.competitiveParity.label})
+- **SERP Language Match (15%):** ${analysis.overallPerformance.factors.languageAlignment.score}% (${analysis.overallPerformance.factors.languageAlignment.label})
+` : `**Overall Performance Score:** ${analysis.score}%  
+`}
 ${analysis.rankingChanceReport ? `**Your Chance of Ranking in Google:** ${analysis.rankingChanceReport.overallRankingChance}% (${analysis.rankingChanceReport.tier})  
 ` : ''}
 ---
@@ -28,12 +35,6 @@ ${analysis.rankingChanceReport.topQueries.map((q, i) => `${i + 1}. **"${q.query}
 
 ---
 ` : ''}
-## Intent Satisfaction Breakdown
-- **${analysis.intentCategory} Query Relevance (50%):** ${analysis.factorScores.queryRelevance}%
-- **Content Structure (25%):** ${analysis.factorScores.structure}%
-- **Readability & Scanning Experience (15%):** ${analysis.factorScores.readability}%
-- **First-hand Quality Data (10%):** ${analysis.factorScores.firstHandDataBonus}%
-
 ${analysis.intentMismatch ? `\n> ⚠️ **Search Intent Mismatch Warning**\n> ${analysis.intentMismatchReason}\n> - User format: ${analysis.userPageType}\n> - Google prefers: ${analysis.topPagesType}\n` : ''}
 ${analysis.languageAudit ? `
 ---
@@ -390,28 +391,28 @@ export function downloadAnalysisPdf(
 
   <div class="score-card">
     <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868b;">
-      Search Intent Satisfaction Score
+      Overall Performance Score
     </div>
-    <div class="score-num">${analysis.score}%</div>
+    <div class="score-num">${analysis.overallPerformance ? analysis.overallPerformance.overallScore : analysis.score}%</div>
     <div style="font-size: 12px; font-weight: 600;">
-      ${analysis.score >= 80 ? 'High Intent Parity with Market Leaders' : 'Topic Gaps Detected Against Competitors'}
+      ${analysis.overallPerformance ? analysis.overallPerformance.summary : (analysis.score >= 80 ? 'High Intent Parity with Market Leaders' : 'Topic Gaps Detected Against Competitors')}
     </div>
     <div class="factors-grid">
       <div class="factor-item">
-        <span class="factor-title">Relevance (50%)</span>
-        <span class="factor-val">${analysis.factorScores.queryRelevance}%</span>
+        <span class="factor-title">Search Intent (35%)</span>
+        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.searchIntent.score : analysis.factorScores.queryRelevance}%</span>
       </div>
       <div class="factor-item">
-        <span class="factor-title">Structure (25%)</span>
-        <span class="factor-val">${analysis.factorScores.structure}%</span>
+        <span class="factor-title">UI/UX Scannability (25%)</span>
+        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.scannabilityUx.score : analysis.factorScores.structure}%</span>
       </div>
       <div class="factor-item">
-        <span class="factor-title">Readability (15%)</span>
-        <span class="factor-val">${analysis.factorScores.readability}%</span>
+        <span class="factor-title">Competitive Parity (25%)</span>
+        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.competitiveParity.score : analysis.factorScores.readability}%</span>
       </div>
       <div class="factor-item">
-        <span class="factor-title">First-hand (10%)</span>
-        <span class="factor-val">${analysis.factorScores.firstHandDataBonus}%</span>
+        <span class="factor-title">Language Match (15%)</span>
+        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.languageAlignment.score : 100}%</span>
       </div>
     </div>
   </div>

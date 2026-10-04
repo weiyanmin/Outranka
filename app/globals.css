@@ -60,7 +60,7 @@ body {
   }
 }
 
-/* Top Hero Scores: Search Intent Score & Chance of Ranking side by side */
+/* Top Hero Scores: Overall Performance Score & Chance of Ranking side by side */
 .hero-scores-grid {
   display: grid;
   grid-template-columns: 1fr;
