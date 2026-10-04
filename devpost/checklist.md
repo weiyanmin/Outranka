@@ -71,7 +71,7 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 3, when the real score first appears and can shape the remaining slices
+- [x] Early usable behavior explored — learner confirmed the hands-on check is now complete; completed later than the planned after-slice-3 checkpoint
 - [x] Final kick-the-tires exploration and feedback completed — learner said, “I think all good now”; no revisions requested.
 
 ## Final Review
@@ -92,4 +92,4 @@ Activity mode: Brief evidence-based recap; no interactive editor walkthrough cla
 
 ## Revisions
 
-- The planned early usable-behavior checkpoint after slice 3 was not recorded at that point. It remains unchecked rather than being backdated; the final full-app review is separately completed.
+- The planned early usable-behavior checkpoint after slice 3 was not recorded at that point. The learner later confirmed completing the hands-on check; marked complete without backdating it. The final full-app review is separately completed.
