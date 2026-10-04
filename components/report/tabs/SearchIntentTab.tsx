@@ -45,7 +45,7 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
       <SectionCard
         title="Search Intent"
         subtitle="What searchers want vs. the page type you wrote"
-        span={6}
+        span={12}
         action={<Pill tone="accent">{analysis.intentCategory}</Pill>}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -239,7 +239,7 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
       <SectionCard
         title="What the Top Results Target"
         subtitle="Intent behind the pages currently ranking"
-        span={6}
+        span={12}
       >
         {segments.length > 0 ? (
           <>

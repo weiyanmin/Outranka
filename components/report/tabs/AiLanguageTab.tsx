@@ -22,8 +22,8 @@ export default function AiLanguageTab({ analysis }: { analysis: AnalysisResult }
 
   return (
     <div className="bento">
-      <AiOverviewCard aiOverview={analysis.aiOverview} span={hasLanguage ? 7 : 12} />
-      <LanguageMismatchBanner languageAudit={analysis.languageAudit} span={hasAi ? 5 : 12} />
+      <AiOverviewCard aiOverview={analysis.aiOverview} span={12} />
+      <LanguageMismatchBanner languageAudit={analysis.languageAudit} span={12} />
     </div>
   );
 }

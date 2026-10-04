@@ -18,10 +18,13 @@ export default function OpportunitiesTab({ analysis }: { analysis: AnalysisResul
         <SectionCard
           title="Topics You Are Missing"
           subtitle="Subtopics top competitors cover that your content lacks"
-          span={recs.length > 0 ? 7 : 12}
+          span={12}
           action={<Pill tone="warning">{topics.length} gaps</Pill>}
         >
-          <ol className="clean-list">
+          <ol
+            className="clean-list"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px 28px' }}
+          >
             {topics.map((t, i) => (
               <li key={i} className="clean-list-item" style={{ fontWeight: 500 }}>
                 <span className="num-badge">{i + 1}</span>
@@ -36,7 +39,7 @@ export default function OpportunitiesTab({ analysis }: { analysis: AnalysisResul
         <SectionCard
           title="Priority Recommendations"
           subtitle="Do these first to outrank the current results"
-          span={topics.length > 0 ? 5 : 12}
+          span={12}
         >
           <ol className="clean-list">
             {recs.map((r, i) => (
@@ -55,7 +58,7 @@ export default function OpportunitiesTab({ analysis }: { analysis: AnalysisResul
         <SectionCard
           title="Suggested Content Structure"
           subtitle="Recommended H2 / H3 outline aligned with what Google is ranking"
-          span={schema.length > 0 ? 7 : 12}
+          span={12}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {structure.map((s, i) => {
@@ -88,11 +91,19 @@ export default function OpportunitiesTab({ analysis }: { analysis: AnalysisResul
         <SectionCard
           title="Suggested Schema Markup"
           subtitle="Structured data used by top-performing competitors"
-          span={structure.length > 0 ? 5 : 12}
+          span={12}
         >
-          <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
             {schema.map((sch, i) => (
-              <div key={i}>
+              <div
+                key={i}
+                style={{
+                  padding: '16px 18px',
+                  background: '#fafafc',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '10px',
+                }}
+              >
                 <Pill tone="accent">{sch.type}</Pill>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-color)', lineHeight: 1.5, marginTop: 8 }}>{sch.reason}</p>
               </div>
