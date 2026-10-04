@@ -339,6 +339,7 @@ export default function ResultsPage() {
         <CompetitorList
           competitors={competitors}
           competitorIntents={analysis.competitorIntents}
+          aiOverview={analysis.aiOverview}
         />
       )}
     </div>

@@ -61,6 +61,16 @@ ${analysis.scannabilityAudit ? `
 
 ### Specific Scannability Rules:
 ${analysis.scannabilityAudit.checks.map(c => `- [${c.status.toUpperCase()}] **${c.label}**: ${c.userValue} (Benchmark: ${c.competitorBenchmark}) — ${c.guidance}`).join('\n')}
+${analysis.aiOverview ? `
+---
+
+## Google AI Overview (AI Mode)
+- **Status:** ${analysis.aiOverview.triggered ? 'Triggered (AI Overview generated for this query)' : 'Not Triggered'}
+${analysis.aiOverview.triggered && analysis.aiOverview.snippet ? `- **AI Summary Excerpt:** "${analysis.aiOverview.snippet}"\n` : ''}
+${analysis.aiOverview.triggered && analysis.aiOverview.references.length > 0 ? `### Pages Cited by Google AI:
+${analysis.aiOverview.references.map((r, i) => `${i + 1}. [${r.domain || r.source}] ${r.title} — ${r.link}${r.matchesCompetitorRank ? ` (Matches Organic Competitor #${r.matchesCompetitorRank})` : ''}`).join('\n')}
+` : ''}
+` : ''}
 ` : ''}
 
 ---
@@ -444,6 +454,34 @@ export function downloadAnalysisPdf(
         </div>
       `).join('')}
     </div>
+  </div>
+  ` : ''}
+
+  ${analysis.aiOverview ? `
+  <div class="section">
+    <div class="section-title">Google AI Overview &amp; Citations</div>
+    <div style="margin-bottom: 8px;">
+      <span class="badge" style="font-size: 10px; background: ${analysis.aiOverview.triggered ? 'rgba(40,167,156,0.15)' : '#f1f5f9'}; color: ${analysis.aiOverview.triggered ? '#28a79c' : '#64748b'};">
+        ${analysis.aiOverview.triggered ? '● Google AI Mode Triggered' : '○ AI Mode Not Triggered'}
+      </span>
+    </div>
+    ${analysis.aiOverview.snippet ? `
+      <div style="font-size: 11px; color: #475569; font-style: italic; background: #fafafc; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0;">
+        &ldquo;${analysis.aiOverview.snippet}&rdquo;
+      </div>
+    ` : ''}
+    ${analysis.aiOverview.references && analysis.aiOverview.references.length > 0 ? `
+      <div style="font-size: 11px; font-weight: 700; margin-bottom: 6px;">Pages Cited by Google AI (${analysis.aiOverview.references.length}):</div>
+      <div class="rec-list">
+        ${analysis.aiOverview.references.map(r => `
+          <div class="rec-item">
+            <strong>${r.title}</strong> (${r.domain || r.source})<br/>
+            <span style="color: #86868b; font-size: 9px;">${r.link}</span>
+            ${r.matchesCompetitorRank ? `<span class="badge" style="font-size: 8px; margin-left: 6px;">Matches Competitor #${r.matchesCompetitorRank}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
   </div>
   ` : ''}
 

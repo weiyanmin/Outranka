@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { SerpResultItem } from '../lib/serp';
+import { SerpResultItem, GoogleAiOverviewData } from '../lib/serp';
 import { CompetitorIntentInfo } from '../lib/analyze';
 import { SearchIntentCategory } from '../lib/scoring';
 
 interface CompetitorListProps {
   competitors: SerpResultItem[];
   competitorIntents?: CompetitorIntentInfo[];
+  aiOverview?: GoogleAiOverviewData;
 }
 
-export default function CompetitorList({ competitors, competitorIntents }: CompetitorListProps) {
+export default function CompetitorList({ competitors, competitorIntents, aiOverview }: CompetitorListProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!competitors || competitors.length === 0) {
@@ -115,6 +116,33 @@ export default function CompetitorList({ competitors, competitorIntents }: Compe
                     {intent} Intent
                   </span>
                 )}
+
+                {/* AI Overview Citation Badge */}
+                {aiOverview?.triggered &&
+                  aiOverview.references.some(
+                    (ref) =>
+                      ref.matchesCompetitorRank === item.position ||
+                      ref.link === item.link ||
+                      (item.link && ref.domain && item.link.includes(ref.domain))
+                  ) && (
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        background: 'linear-gradient(135deg, rgba(40, 167, 156, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)',
+                        color: 'var(--accent-color)',
+                        border: '1px solid rgba(40, 167, 156, 0.35)',
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        flexShrink: 0,
+                      }}
+                    >
+                      ✨ Cited in AI Overview
+                    </span>
+                  )}
               </div>
 
               <div style={{ marginBottom: '4px' }}>

@@ -52,8 +52,10 @@ export async function POST(req: NextRequest) {
       userMetrics = analyzeMarkdownOrText(userTextContent);
     }
 
-    // Step 1: Fetch top 10 search results
-    const competitors = await fetchTop10Results(keyword.trim(), location || 'global');
+    // Step 1: Fetch top 10 search results and Google AI Overview
+    const serpData = await fetchTop10Results(keyword.trim(), location || 'global');
+    const { competitors, aiOverview } = serpData;
+
     if (!competitors || competitors.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No search results found for this keyword and location.' },
@@ -109,6 +111,7 @@ export async function POST(req: NextRequest) {
     const competitorMetricsList = competitorPages.map((cp) => cp.content.metrics);
     const scannabilityAudit = evaluateScannabilityAndStructure(userMetrics, competitorMetricsList);
     analysis.scannabilityAudit = scannabilityAudit;
+    analysis.aiOverview = aiOverview;
 
     // Merge extracted schema types & structural metrics back into the competitor items
     const enrichedCompetitors = competitorPages.map((cp) => ({
@@ -121,6 +124,7 @@ export async function POST(req: NextRequest) {
       success: true,
       competitors: enrichedCompetitors,
       analysis,
+      aiOverview,
     });
   } catch (error: any) {
     return NextResponse.json(

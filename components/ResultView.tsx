@@ -1,5 +1,6 @@
 import React from 'react';
 import { AnalysisResult } from '../lib/analyze';
+import AiOverviewCard from './AiOverviewCard';
 
 interface ResultViewProps {
   analysis: AnalysisResult;
@@ -391,6 +392,9 @@ export default function ResultView({ analysis }: ResultViewProps) {
 
       {/* Secondary Column (Right) */}
       <div className="results-col-secondary">
+        {/* Google AI Overview & Citations Donut Graph */}
+        <AiOverviewCard aiOverview={analysis.aiOverview} />
+
         {/* 5. Priority Recommendations */}
         {analysis.topRecommendations && analysis.topRecommendations.length > 0 && (
           <div className="card">
