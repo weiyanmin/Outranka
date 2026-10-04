@@ -62,47 +62,64 @@ export default function Home() {
   };
 
   return (
-    <div className="home-container">
-      <div className="home-topbar">
-        <nav className="home-primary-nav" aria-label="Main navigation">
-          <a className="home-nav-link home-nav-link-active" href="#new-audit" aria-current="page">
-            <GoogleIcon name="manage_search" size={17} color="currentColor" />
-            <span>New audit</span>
-          </a>
-          {hasLatestReport && (
-            <Link className="home-nav-link" href="/results">
-              <GoogleIcon name="description" size={17} color="currentColor" />
-              <span>Latest results</span>
+    <>
+      <header className="results-sticky-nav home-sticky-nav">
+        <div className="results-nav-inner">
+          <div className="results-nav-left">
+            <Link href="/" className="results-nav-brand" title="Outranka home">
+              <BrandMark size={30} className="results-nav-logo-mark" />
+              <span>Outranka</span>
             </Link>
-          )}
-        </nav>
-        <AccountControl />
-      </div>
-      <header className="header">
-        <div className="badge-pill">
-          <GoogleIcon name="track_changes" size={13} color="currentColor" /> 4-Intent SEO Analyzer
-        </div>
-        <h1 className="title home-wordmark"><BrandMark size={46} /> <span>Outranka</span></h1>
-        <p className="subtitle">
-          Audit your content against Google&apos;s top 10 ranking pages. Uncover search intent gaps and exact missing topics.
-        </p>
-      </header>
+            <div className="results-nav-divider" />
+            <div className="results-nav-context">
+              <span className="results-nav-keyword">New SEO Audit</span>
+              <span className="results-nav-location">4-INTENT ANALYZER</span>
+            </div>
+          </div>
 
-      {isLoading ? (
-        <div id="new-audit"><LoadingSteps keyword={activeKeyword} /></div>
-      ) : (
-        <div id="new-audit"><InputForm onSubmit={handleSubmit} isLoading={isLoading} /></div>
-      )}
-
-      {error && !isLoading && (
-        <div className="error-banner">
-          <GoogleIcon name="warning" size={18} color="var(--error-text)" />
-          <div>
-            <strong>Error: </strong>
-            <span>{error}</span>
+          <div className="results-nav-actions">
+            <AccountControl />
+            {hasLatestReport && (
+              <Link href="/results" className="results-nav-btn results-nav-btn-secondary" title="Open latest audit results">
+                <GoogleIcon name="description" size={16} color="currentColor" />
+                <span>Latest Results</span>
+              </Link>
+            )}
+            <a href="#new-audit" className="results-nav-btn results-nav-btn-primary home-start-audit">
+              <GoogleIcon name="manage_search" size={16} color="currentColor" />
+              <span>Start Audit</span>
+            </a>
           </div>
         </div>
-      )}
-    </div>
+      </header>
+
+      <div className="home-container">
+        <header className="header">
+          <div className="badge-pill">
+            <GoogleIcon name="track_changes" size={13} color="currentColor" /> 4-Intent SEO Analyzer
+          </div>
+          <h1 className="title home-wordmark"><BrandMark size={46} /> <span>Outranka</span></h1>
+          <p className="subtitle">
+            Audit your content against Google&apos;s top 10 ranking pages. Uncover search intent gaps and exact missing topics.
+          </p>
+        </header>
+
+        {isLoading ? (
+          <div id="new-audit"><LoadingSteps keyword={activeKeyword} /></div>
+        ) : (
+          <div id="new-audit"><InputForm onSubmit={handleSubmit} isLoading={isLoading} /></div>
+        )}
+
+        {error && !isLoading && (
+          <div className="error-banner">
+            <GoogleIcon name="warning" size={18} color="var(--error-text)" />
+            <div>
+              <strong>Error: </strong>
+              <span>{error}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
