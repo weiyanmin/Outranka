@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GoogleAiOverviewData } from '../lib/serp';
 
 interface AiOverviewCardProps {
@@ -8,11 +8,14 @@ interface AiOverviewCardProps {
 }
 
 export default function AiOverviewCard({ aiOverview }: AiOverviewCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!aiOverview) return null;
 
   const isTriggered = aiOverview.triggered;
   const references = aiOverview.references || [];
   const topDomains = aiOverview.topDomainsDistribution || [];
+  const displayedReferences = isExpanded ? references : references.slice(0, 3);
 
   // Color palette for SVG donut chart segments
   const sliceColors = [
@@ -255,11 +258,16 @@ export default function AiOverviewCard({ aiOverview }: AiOverviewCardProps) {
 
           {/* Cited Pages List */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-color)' }}>
-              All Cited Pages ({references.length}):
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                Pages Cited by Google AI:
+              </span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 7px', borderRadius: '6px' }}>
+                Showing {displayedReferences.length} of {references.length}
+              </span>
+            </div>
 
-            {references.map((ref, idx) => (
+            {displayedReferences.map((ref, idx) => (
               <div
                 key={idx}
                 style={{
@@ -329,6 +337,53 @@ export default function AiOverviewCard({ aiOverview }: AiOverviewCardProps) {
                 )}
               </div>
             ))}
+
+            {references.length > 3 && (
+              <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#ffffff',
+                    color: 'var(--accent-color)',
+                    border: '1px solid var(--border-color)',
+                    padding: '6px 14px',
+                    borderRadius: '9999px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--accent-color)';
+                    e.currentTarget.style.background = 'var(--accent-light)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                    e.currentTarget.style.background = '#ffffff';
+                  }}
+                >
+                  {isExpanded ? (
+                    <>
+                      Show Less
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                    </>
+                  ) : (
+                    <>
+                      See More ({references.length - 3} more citations)
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}
