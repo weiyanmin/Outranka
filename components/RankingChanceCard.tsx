@@ -71,7 +71,7 @@ export default function RankingChanceCard({ report, variant = 'summary', span = 
 
   return (
     <SectionCard
-      title="Ranking Chance by Query"
+      title="Ranking Chances & Relevancy"
       subtitle="What is helping each query and the single best action to rank higher"
       span={span}
     >
