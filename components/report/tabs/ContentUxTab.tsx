@@ -20,15 +20,20 @@ const groupLabel: React.CSSProperties = {
   marginBottom: '14px',
 };
 
+function formatBenchmark(text: string): string {
+  return text
+    .replace(/% of Competitors Use TOC/i, '% Use TOC')
+    .replace(/ in Top 10$/i, '')
+    .trim();
+}
+
 function ScannabilityCheckCard({ chk }: { chk: Check }) {
   const isAlert = chk.status === 'alert';
   const isWarning = chk.status === 'warning';
 
-  const tone = isAlert ? 'danger' : isWarning ? 'warning' : 'success';
-  const statusLabel = isAlert ? 'Needs Attention' : isWarning ? 'Could Improve' : 'Optimal';
   const iconName = isAlert ? 'error' : isWarning ? 'warning' : 'check_circle';
   const iconColor = isAlert ? COLORS.danger : isWarning ? COLORS.warning : COLORS.success;
-  const iconBg = isAlert ? '#fef2f2' : isWarning ? '#fffbeb' : '#ecfdf5';
+  const iconBg = isAlert ? '#fee2e2' : isWarning ? '#fef3c7' : '#d1fae5';
 
   return (
     <div
@@ -45,7 +50,7 @@ function ScannabilityCheckCard({ chk }: { chk: Check }) {
         flexWrap: 'wrap',
       }}
     >
-      {/* Left: Icon, Title, Badge, Guidance */}
+      {/* Left: Standardized Icon, Title (no redundant badges), Guidance */}
       <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', flex: 1, minWidth: '260px' }}>
         <div
           style={{
@@ -64,11 +69,10 @@ function ScannabilityCheckCard({ chk }: { chk: Check }) {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '0.96rem', fontWeight: 600, color: 'var(--text-color)' }}>
               {chk.label}
             </span>
-            <Pill tone={tone}>{statusLabel}</Pill>
           </div>
           <p style={{ fontSize: '0.86rem', lineHeight: 1.5, color: 'var(--muted-text)', margin: '6px 0 0' }}>
             {chk.guidance || 'Matches top ranking competitor scannability standards.'}
@@ -76,43 +80,43 @@ function ScannabilityCheckCard({ chk }: { chk: Check }) {
         </div>
       </div>
 
-      {/* Right: Metrics comparison pill */}
+      {/* Right: Refined Metrics Comparison Box */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '14px',
-          padding: '8px 14px',
+          gap: '18px',
+          padding: '12px 18px',
           background: 'var(--segmented-bg)',
-          borderRadius: '8px',
-          border: '1px solid var(--border-color)',
+          borderRadius: '10px',
+          border: '1px solid rgba(0, 0, 0, 0.09)',
           flexShrink: 0,
         }}
       >
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', minWidth: '85px' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: '3px' }}>
             Your Draft
           </div>
           <div
             style={{
-              fontSize: '0.86rem',
+              fontSize: '0.88rem',
               fontWeight: 700,
               color: isAlert ? COLORS.danger : isWarning ? COLORS.warning : 'var(--text-color)',
-              marginTop: '2px',
+              lineHeight: 1.25,
             }}
           >
             {chk.userValue}
           </div>
         </div>
 
-        <div style={{ width: '1px', height: '24px', background: 'var(--border-color)' }} />
+        <div style={{ width: '1px', height: '32px', background: 'rgba(0, 0, 0, 0.16)', flexShrink: 0 }} />
 
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', minWidth: '110px' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: '3px' }}>
             Top 10 Benchmark
           </div>
-          <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--muted-text)', marginTop: '2px' }}>
-            {chk.competitorBenchmark}
+          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-color)', opacity: 0.85, lineHeight: 1.25 }}>
+            {formatBenchmark(chk.competitorBenchmark)}
           </div>
         </div>
       </div>
@@ -248,13 +252,13 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
                 style={{
                   border: 'none',
                   background: filter === t.id ? '#ffffff' : 'transparent',
-                  color: filter === t.id ? 'var(--text-color)' : 'var(--muted-text)',
+                  color: filter === t.id ? 'var(--text-color)' : '#4b5563',
                   fontSize: '0.78rem',
-                  fontWeight: filter === t.id ? 700 : 500,
+                  fontWeight: filter === t.id ? 700 : 600,
                   padding: '5px 12px',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  boxShadow: filter === t.id ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                  boxShadow: filter === t.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
               >

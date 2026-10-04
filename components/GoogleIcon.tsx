@@ -62,7 +62,7 @@ const ICON_PATHS: Record<GoogleIconName, string> = {
   expand_more: "M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z",
   expand_less: "M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z",
   error:
-    "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 5h-2v-2h2v2zm0-4h-2V7h2v6z",
+    "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
   code:
     "M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",
   download: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
@@ -97,7 +97,7 @@ export default function GoogleIcon({
       }}
       aria-hidden="true"
     >
-      <path d={path} />
+      <path d={path} fillRule="evenodd" />
     </svg>
   );
 }

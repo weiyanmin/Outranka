@@ -295,7 +295,7 @@ export function evaluateScannabilityAndStructure(
       label: 'H2 Section Breakdown',
       status: 'alert',
       userValue: '0 H2 Headings',
-      competitorBenchmark: `Avg ${avgH2} H2s in Top 10`,
+      competitorBenchmark: `Avg ${avgH2} H2s`,
       guidance: 'Wall of text detected. Break content into structured H2 sections with descriptive subheadings.',
     });
   }
@@ -372,7 +372,7 @@ export function evaluateScannabilityAndStructure(
       label: 'Table of Contents (Jump Navigation)',
       status: 'pass',
       userValue: 'Present',
-      competitorBenchmark: `${tocRate}% of Competitors Use TOC`,
+      competitorBenchmark: `${tocRate}% Use TOC`,
       guidance: 'Jump-link navigation allows quick mobile skimming and can win Google SERP site-links.',
     });
   } else if (userMetrics.wordCount > 900 || tocRate >= 40) {
@@ -382,7 +382,7 @@ export function evaluateScannabilityAndStructure(
       label: 'Table of Contents (Jump Navigation)',
       status: tocRate >= 50 ? 'alert' : 'warning',
       userValue: 'Missing',
-      competitorBenchmark: `${tocRate}% of Competitors Use TOC`,
+      competitorBenchmark: `${tocRate}% Use TOC`,
       guidance: `For long-form reading (${userMetrics.wordCount} words), adding an interactive Table of Contents improves mobile UX and reduces bounce rate.`,
     });
   } else {
