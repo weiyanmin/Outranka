@@ -82,63 +82,126 @@ export default function RankingChanceCard({ report, variant = 'summary', span = 
       subtitle="What is helping each query and the single best action to rank higher"
       span={span}
     >
+      {/* 4 Algorithmic Factors Sleek Strip */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '24px',
-          paddingBottom: '28px',
-          marginBottom: '28px',
-          borderBottom: '1px solid var(--border-color)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+          gap: '12px',
+          marginBottom: '20px',
         }}
       >
         {factors.map((f) => (
-          <BarList key={f.label} items={[f]} />
+          <div
+            key={f.label}
+            style={{
+              padding: '12px 14px',
+              background: 'var(--segmented-bg)',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)' }}>{f.label}</span>
+              <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-color)' }}>{f.value}%</span>
+            </div>
+            <div style={{ height: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 9999, overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${f.value}%`,
+                  height: '100%',
+                  background: f.value >= 75 ? COLORS.success : f.value >= 50 ? COLORS.accent : COLORS.warning,
+                  borderRadius: 9999,
+                }}
+              />
+            </div>
+          </div>
         ))}
       </div>
 
-      <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Clean Query Action Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {report.topQueries.map((q, idx) => {
           const meta = tierMeta(q.tier);
           return (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: idx === 0 ? 0 : 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                  <span className="num-badge" style={idx === 0 ? { background: 'var(--accent-color)', color: '#fff' } : undefined}>
+            <div
+              key={idx}
+              style={{
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                padding: '14px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+              }}
+            >
+              {/* Top Row: Rank + Query + Pill <----> Mini Progress Bar + Score + Tier */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                  <span
+                    className="num-badge"
+                    style={idx === 0 ? { background: 'var(--accent-color)', color: '#fff' } : undefined}
+                  >
                     {idx + 1}
                   </span>
-                  <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-color)' }}>“{q.query}”</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.94rem', color: 'var(--text-color)' }}>
+                    “{q.query}”
+                  </span>
                   {idx === 0 && <Pill tone="accent">Primary target</Pill>}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                  <div style={{ width: '70px', height: '6px', background: COLORS.track, borderRadius: 9999, overflow: 'hidden' }}>
+                    <div style={{ width: `${q.chanceScore}%`, height: '100%', background: meta.color, borderRadius: 9999 }} />
+                  </div>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 800, color: meta.color, minWidth: '38px', textAlign: 'right' }}>
+                    {q.chanceScore}%
+                  </span>
                   <Pill tone={meta.tone}>{q.tier}</Pill>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: meta.color }}>{q.chanceScore}%</span>
                 </div>
               </div>
 
-              <div style={{ height: 8, background: COLORS.track, borderRadius: 9999, overflow: 'hidden' }}>
-                <div style={{ width: `${q.chanceScore}%`, height: '100%', background: meta.color, borderRadius: 9999 }} />
-              </div>
+              {/* Bottom Row: Clear Action & Supporting Strength */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                  paddingTop: '8px',
+                  borderTop: '1px solid rgba(0, 0, 0, 0.04)',
+                  fontSize: '0.84rem',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '240px', flex: 1 }}>
+                  <GoogleIcon name="bolt" size={15} color="var(--accent-color)" />
+                  <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>Action:</span>
+                  <span style={{ color: 'var(--muted-text)', lineHeight: 1.4 }}>{q.actionToRankHigher}</span>
+                </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px 28px' }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                  <GoogleIcon name="check_circle" size={18} color={COLORS.success} style={{ marginTop: 2 }} />
-                  <div>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted-text)' }}>
-                      Working for you
-                    </div>
-                    <div style={{ fontSize: '0.88rem', lineHeight: 1.45, color: 'var(--text-color)', marginTop: 2 }}>{q.keyAdvantage}</div>
+                {q.keyAdvantage && (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '2px 8px',
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      border: '1px solid rgba(16, 185, 129, 0.2)',
+                      borderRadius: '6px',
+                      color: '#047857',
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <GoogleIcon name="check_circle" size={13} color="#047857" />
+                    <span>{q.keyAdvantage}</span>
                   </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                  <GoogleIcon name="bolt" size={18} color="var(--accent-color)" style={{ marginTop: 2 }} />
-                  <div>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted-text)' }}>
-                      To rank higher
-                    </div>
-                    <div style={{ fontSize: '0.88rem', lineHeight: 1.45, color: 'var(--text-color)', marginTop: 2 }}>{q.actionToRankHigher}</div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           );
