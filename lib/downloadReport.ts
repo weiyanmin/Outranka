@@ -72,3 +72,368 @@ ${competitors.map((c) => {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+export function downloadAnalysisPdf(
+  query: { keyword: string; location: string; inputType: string },
+  analysis: AnalysisResult,
+  competitors: SerpResultItem[]
+) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Please allow popups to generate the PDF report.');
+    return;
+  }
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Outranka Report - ${query.keyword}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 14mm 16mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1d1d1f;
+      background: #ffffff;
+      line-height: 1.45;
+      padding: 10px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #28a79c;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .brand {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1d1d1f;
+      letter-spacing: -0.02em;
+    }
+    .tagline {
+      font-size: 11px;
+      color: #86868b;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .meta-date {
+      font-size: 11px;
+      color: #86868b;
+      text-align: right;
+    }
+    .query-box {
+      background: #fbfbfc;
+      border: 1px solid #e5e5ea;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .query-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1d1d1f;
+    }
+    .badges {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      align-items: center;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #eef8f7;
+      color: #28a79c;
+      border: 1px solid rgba(40, 167, 156, 0.3);
+    }
+    .score-card {
+      background: #ffffff;
+      border: 1px solid #e5e5ea;
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .score-num {
+      font-size: 46px;
+      font-weight: 800;
+      color: #28a79c;
+      line-height: 1;
+      margin: 8px 0;
+    }
+    .factors-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f2;
+      text-align: left;
+    }
+    .factor-item {
+      background: #fbfbfc;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #f0f0f2;
+    }
+    .factor-title {
+      font-size: 10px;
+      color: #86868b;
+      display: block;
+    }
+    .factor-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1d1d1f;
+    }
+    .section {
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #f0f0f2;
+      padding-bottom: 4px;
+    }
+    .topic-list, .rec-list {
+      list-style: none;
+    }
+    .topic-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #fbfbfc;
+      border: 1px solid #e5e5ea;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .topic-num {
+      background: #28a79c;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .rec-item {
+      font-size: 12px;
+      margin-bottom: 6px;
+      padding-left: 12px;
+      position: relative;
+    }
+    .rec-item::before {
+      content: "•";
+      color: #28a79c;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    .structure-item {
+      padding: 8px 10px;
+      background: #fbfbfc;
+      border: 1px solid #e5e5ea;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+    .structure-head {
+      font-weight: 700;
+      color: #28a79c;
+    }
+    .competitor-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+    .competitor-table th {
+      background: #fbfbfc;
+      text-align: left;
+      padding: 6px 8px;
+      border: 1px solid #e5e5ea;
+      font-weight: 600;
+      color: #86868b;
+    }
+    .competitor-table td {
+      padding: 6px 8px;
+      border: 1px solid #e5e5ea;
+      vertical-align: top;
+    }
+    .mismatch-alert {
+      background: #fffbf0;
+      border: 1px solid #fde68a;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #92400e;
+      margin-bottom: 16px;
+    }
+    @media print {
+      body {
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="brand">Outranka</div>
+      <div class="tagline">Search Intent & Competitor SEO Auditor</div>
+    </div>
+    <div class="meta-date">
+      <div>Generated: ${new Date().toLocaleDateString()}</div>
+      <div>Powered by Google Gemini 3.8 Flash</div>
+    </div>
+  </div>
+
+  <div class="query-box">
+    <div class="query-title">Target: "${query.keyword}"</div>
+    <div class="badges">
+      <span class="badge">${query.location.toUpperCase()} REGION</span>
+      <span class="badge">${analysis.intentCategory} INTENT</span>
+    </div>
+    <div style="font-size: 12px; color: #86868b; margin-top: 6px;">
+      Query Goal: ${analysis.keywordIntent}
+    </div>
+  </div>
+
+  <div class="score-card">
+    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868b;">
+      Search Intent Satisfaction Score
+    </div>
+    <div class="score-num">${analysis.score}%</div>
+    <div style="font-size: 12px; font-weight: 600;">
+      ${analysis.score >= 80 ? 'High Intent Parity with Market Leaders' : 'Topic Gaps Detected Against Competitors'}
+    </div>
+    <div class="factors-grid">
+      <div class="factor-item">
+        <span class="factor-title">Relevance (50%)</span>
+        <span class="factor-val">${analysis.factorScores.queryRelevance}%</span>
+      </div>
+      <div class="factor-item">
+        <span class="factor-title">Structure (25%)</span>
+        <span class="factor-val">${analysis.factorScores.structure}%</span>
+      </div>
+      <div class="factor-item">
+        <span class="factor-title">Readability (15%)</span>
+        <span class="factor-val">${analysis.factorScores.readability}%</span>
+      </div>
+      <div class="factor-item">
+        <span class="factor-title">First-hand (10%)</span>
+        <span class="factor-val">${analysis.factorScores.firstHandDataBonus}%</span>
+      </div>
+    </div>
+  </div>
+
+  ${analysis.intentMismatch ? `
+    <div class="mismatch-alert">
+      <strong>⚠️ Intent Mismatch Warning:</strong> ${analysis.intentMismatchReason}
+      <div style="margin-top: 4px;">User: ${analysis.userPageType} | Google Expects: ${analysis.topPagesType}</div>
+    </div>
+  ` : ''}
+
+  <div class="section">
+    <div class="section-title">Top 3 Missing Topics</div>
+    <div class="topic-list">
+      ${analysis.missingTopics.map((t, i) => `
+        <div class="topic-item">
+          <div class="topic-num">${i + 1}</div>
+          <div>${t}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Priority Recommendations</div>
+    <div class="rec-list">
+      ${analysis.topRecommendations.map(r => `<div class="rec-item">${r}</div>`).join('')}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Suggested Content Structure</div>
+    ${analysis.suggestedStructure.map(s => `
+      <div class="structure-item">
+        <div class="structure-head">${s.heading}</div>
+        <div style="color: #64748b; margin-top: 2px;">${s.description}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="section">
+    <div class="section-title">Top 10 Google Competitors Breakdown</div>
+    <table class="competitor-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">Rank</th>
+          <th>Page Title & URL</th>
+          <th style="width: 110px;">Intent Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${competitors.map(c => {
+          const intentInfo = analysis.competitorIntents?.find(ci => ci.rank === c.position || ci.url === c.link);
+          return `
+            <tr>
+              <td><strong>#${c.position}</strong></td>
+              <td>
+                <div style="font-weight: 600;">${c.title}</div>
+                <div style="color: #86868b; font-size: 10px;">${c.link}</div>
+              </td>
+              <td>
+                <span class="badge" style="font-size: 9px;">${intentInfo?.intentCategory || 'General'}</span>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 300);
+    };
+  </script>
+</body>
+</html>
+  `;
+
+  printWindow.document.open();
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+}
