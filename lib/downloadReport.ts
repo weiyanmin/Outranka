@@ -58,7 +58,7 @@ ${analysis.topRecommendations.map((rec) => `- ${rec}`).join('\n')}
 ---
 
 ## Suggested Content Structure
-${analysis.suggestedStructure.map((s) => `### ${s.heading}\n${s.description}\n`).join('\n')}
+${analysis.suggestedStructure.map((s) => `### [${s.level || 'H2'}] ${s.heading}\n${s.description}\n`).join('\n')}
 
 ---
 
@@ -494,11 +494,16 @@ export function downloadAnalysisPdf(
   </div>
 
   <div class="section">
-    <div class="section-title">Suggested Content Structure</div>
+    <div class="section-title">Suggested Content Structure (H2, H3 Hierarchy)</div>
     ${analysis.suggestedStructure.map(s => `
-      <div class="structure-item">
-        <div class="structure-head">${s.heading}</div>
-        <div style="color: #64748b; margin-top: 2px;">${s.description}</div>
+      <div class="structure-item" style="margin-left: ${(s.level || 'H2') === 'H2' ? '0' : '16px'}; border-left: 3px solid ${(s.level || 'H2') === 'H2' ? '#28a79c' : '#3b82f6'};">
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+          <span style="font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: ${(s.level || 'H2') === 'H2' ? 'rgba(40,167,156,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${(s.level || 'H2') === 'H2' ? '#28a79c' : '#2563eb'};">
+            ${s.level || 'H2'}
+          </span>
+          <span class="structure-head">${s.heading}</span>
+        </div>
+        <div style="color: #64748b; font-size: 11px;">${s.description}</div>
       </div>
     `).join('')}
   </div>

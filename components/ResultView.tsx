@@ -495,31 +495,57 @@ export default function ResultView({ analysis }: ResultViewProps) {
           {/* Suggested Content Structure Card */}
           {analysis.suggestedStructure && analysis.suggestedStructure.length > 0 ? (
             <div className="card" style={{ margin: 0 }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '4px' }}>
-                Suggested Content Structure
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <GoogleIcon name="toc" size={20} color="var(--accent-color)" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
+                  Suggested Content Structure
+                </h3>
+              </div>
               <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginBottom: '16px' }}>
-                Recommended headings hierarchy aligned with what Google is currently ranking:
+                Recommended headings hierarchy (H2, H3) aligned with what Google is currently ranking:
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {analysis.suggestedStructure.map((s, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      padding: '12px 14px',
-                      background: '#fafafc',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 'var(--radius-md)',
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--accent-color)', marginBottom: '3px' }}>
-                      {s.heading}
+                {analysis.suggestedStructure.map((s, i) => {
+                  const tagLevel = s.level || (i % 3 === 2 ? 'H3' : 'H2');
+                  const isH2 = tagLevel === 'H2';
+
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        padding: '12px 14px',
+                        background: '#fafafc',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-md)',
+                        marginLeft: isH2 ? '0px' : '16px',
+                        borderLeft: isH2 ? '3px solid var(--accent-color)' : '3px solid #3b82f6',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            letterSpacing: '0.04em',
+                            padding: '2px 7px',
+                            borderRadius: '5px',
+                            background: isH2 ? 'rgba(40, 167, 156, 0.12)' : 'rgba(59, 130, 246, 0.12)',
+                            color: isH2 ? 'var(--accent-color)' : '#2563eb',
+                            border: `1px solid ${isH2 ? 'rgba(40, 167, 156, 0.25)' : 'rgba(59, 130, 246, 0.25)'}`,
+                          }}
+                        >
+                          {tagLevel}
+                        </span>
+                        <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-color)' }}>
+                          {s.heading}
+                        </div>
+                      </div>
+                      <p style={{ fontSize: '0.84rem', color: 'var(--muted-text)', lineHeight: 1.45, margin: 0 }}>
+                        {s.description}
+                      </p>
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', lineHeight: 1.4 }}>
-                      {s.description}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (

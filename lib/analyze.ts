@@ -31,6 +31,7 @@ export interface AnalysisResult {
   missingTopics: string[];
   topRecommendations: string[];
   suggestedStructure: {
+    level?: string;
     heading: string;
     description: string;
   }[];
@@ -106,7 +107,8 @@ Analyze the user content draft against these competitors. Return a strictly vali
   "missingTopics": string[] (EXACTLY 3 specific, actionable topics or subtopics that top ranking competitors cover but the user lacks),
   "topRecommendations": string[] (3-5 priority improvements to outrank competitors),
   "suggestedStructure": [
-    { "heading": "Heading Title", "description": "What to cover under this section to satisfy user query" }
+    { "level": "H2", "heading": "Heading Title", "description": "What to cover under this section to satisfy user query" },
+    { "level": "H3", "heading": "Subheading Title", "description": "What specific subtopic or practical data point to include" }
   ],
   "suggestedSchema": [
     { "type": "SchemaType", "reason": "Why this schema is recommended based on top competitors" }
@@ -182,7 +184,17 @@ Only output valid JSON. Do not wrap in markdown code blocks.
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
       missingTopics: Array.isArray(parsed.missingTopics) ? parsed.missingTopics : [],
       topRecommendations: Array.isArray(parsed.topRecommendations) ? parsed.topRecommendations : [],
-      suggestedStructure: Array.isArray(parsed.suggestedStructure) ? parsed.suggestedStructure : [],
+      suggestedStructure: Array.isArray(parsed.suggestedStructure)
+        ? parsed.suggestedStructure.map((s: any, idx: number) => {
+            const rawLevel = String(s.level || '').toUpperCase().trim();
+            const level = rawLevel === 'H3' ? 'H3' : rawLevel === 'H4' ? 'H4' : 'H2';
+            return {
+              level,
+              heading: String(s.heading || `Section ${idx + 1}`),
+              description: String(s.description || ''),
+            };
+          })
+        : [],
       suggestedSchema: Array.isArray(parsed.suggestedSchema) ? parsed.suggestedSchema : [],
       competitorIntents,
       competitorsAnalyzedCount: competitorPages.length,
