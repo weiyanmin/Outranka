@@ -32,6 +32,7 @@ function gradeTone(grade: OverallPerformanceReport['grade']): Tone {
 }
 
 export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabProps) {
+  const [showBreakdown, setShowBreakdown] = React.useState(false);
   const audit = analysis.scannabilityAudit;
   const passCount = audit?.checks.filter((c) => c.status === 'pass').length ?? 0;
   const totalChecks = audit?.checks.length ?? 0;
@@ -153,6 +154,46 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
         title="4 Performance Pillars"
         subtitle="Core algorithmic evaluation of your content against Google top rankings"
         span={7}
+        action={
+          <button
+            type="button"
+            onClick={() => setShowBreakdown((prev) => !prev)}
+            aria-expanded={showBreakdown}
+            aria-controls="algorithmic-factors-breakdown"
+            style={{
+              background: showBreakdown ? 'var(--accent-light)' : 'var(--segmented-bg)',
+              color: showBreakdown ? 'var(--accent-color)' : 'var(--text-color)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              padding: '5px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <span>{showBreakdown ? 'Hide details' : 'Learn more'}</span>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                transform: showBreakdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+              }}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        }
       >
         {/* The 4 Core Pillar Rings */}
         <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -168,22 +209,77 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
           ))}
         </div>
 
-        {/* Detailed Algorithmic Breakdown */}
-        <div style={{ marginTop: '26px', paddingTop: '22px', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
-              Algorithmic Factors Breakdown
+        {/* Collapsed state prompt */}
+        {!showBreakdown ? (
+          <div
+            style={{
+              marginTop: '20px',
+              paddingTop: '16px',
+              borderTop: '1px solid var(--border-color)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '10px',
+            }}
+          >
+            <span style={{ fontSize: '0.82rem', color: 'var(--muted-text)' }}>
+              Detailed breakdown of all 6 ranking factors
             </span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
-              6 Ranking Factors
-            </span>
+            <button
+              type="button"
+              onClick={() => setShowBreakdown(true)}
+              className="link-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: 'var(--accent-color)',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                padding: '4px 0',
+              }}
+            >
+              Learn more
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
           </div>
+        ) : (
+          /* Detailed Algorithmic Breakdown (shown when Learn more is clicked) */
+          <div
+            id="algorithmic-factors-breakdown"
+            style={{ marginTop: '22px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+                Algorithmic Factors Breakdown
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
+                  6 Ranking Factors
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowBreakdown(false)}
+                  className="link-btn"
+                  style={{ fontSize: '0.78rem', color: 'var(--muted-text)' }}
+                >
+                  Show less
+                </button>
+              </div>
+            </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px 28px' }}>
-            <BarList items={algorithmicFactors.slice(0, 3)} barHeight={7} gap={14} />
-            <BarList items={algorithmicFactors.slice(3, 6)} barHeight={7} gap={14} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px 28px' }}>
+              <BarList items={algorithmicFactors.slice(0, 3)} barHeight={7} gap={14} />
+              <BarList items={algorithmicFactors.slice(3, 6)} barHeight={7} gap={14} />
+            </div>
           </div>
-        </div>
+        )}
       </SectionCard>
 
       {/* Ranking chance summary */}
