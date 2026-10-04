@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { StructuralAssetsMetrics, analyzeHtmlStructureAndAssets } from './scannability';
+import { DetectedLanguage, detectLanguage } from './language';
 
 export interface PageContent {
   url: string;
@@ -8,6 +9,8 @@ export interface PageContent {
   textExcerpt: string;
   schemaTypes: string[];
   metrics: StructuralAssetsMetrics;
+  htmlLang?: string;
+  language?: DetectedLanguage;
   success: boolean;
   error?: string;
 }
@@ -107,6 +110,7 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
     });
 
     const title = $('title').text().trim() || '';
+    const htmlLang = $('html').attr('lang') || $('html').attr('xml:lang') || undefined;
 
     // Remove scripts, styles, svgs, and nav elements to clean up text
     $('script, style, noscript, svg, nav, footer, header').remove();
@@ -115,6 +119,9 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
     const textExcerpt = bodyText.slice(0, 3000);
 
+    // Detect language deterministically
+    const language = detectLanguage(`${title} ${textExcerpt}`, htmlLang);
+
     return {
       url,
       title,
@@ -122,6 +129,8 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
       textExcerpt,
       schemaTypes,
       metrics,
+      htmlLang,
+      language,
       success: true,
     };
   } catch (err: any) {

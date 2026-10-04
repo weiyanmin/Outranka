@@ -4,6 +4,7 @@ import { SerpResultItem, GoogleAiOverviewData, RelatedSearchItem, PeopleAlsoAskI
 import { SCORING_RULES_DESCRIPTION, SearchIntentCategory } from './scoring';
 import { DeterministicAuditSummary } from './scannability';
 import { RankingChanceReport } from './rankingChance';
+import { LanguageAuditResult } from './language';
 
 export interface CompetitorIntentInfo {
   rank: number;
@@ -43,6 +44,7 @@ export interface AnalysisResult {
   relatedSearches?: RelatedSearchItem[];
   peopleAlsoAsk?: PeopleAlsoAskItem[];
   rankingChanceReport?: RankingChanceReport;
+  languageAudit?: LanguageAuditResult;
 }
 
 export async function analyzeContentWithGemini(

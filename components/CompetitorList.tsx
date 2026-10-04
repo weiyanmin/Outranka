@@ -143,6 +143,27 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                       ✨ Cited in AI Overview
                     </span>
                   )}
+
+                {/* Detected Page Language Badge */}
+                {item.language && (
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--border-color)',
+                      color: 'var(--muted-text)',
+                      padding: '2px 7px',
+                      borderRadius: '9999px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    🌐 {item.language.name}
+                  </span>
+                )}
               </div>
 
               <div style={{ marginBottom: '4px' }}>

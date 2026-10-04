@@ -1,4 +1,5 @@
 import { StructuralAssetsMetrics } from './scannability';
+import { DetectedLanguage } from './language';
 
 export interface SerpResultItem {
   position: number;
@@ -7,6 +8,7 @@ export interface SerpResultItem {
   snippet: string;
   schemaTypes?: string[];
   metrics?: StructuralAssetsMetrics;
+  language?: DetectedLanguage;
 }
 
 export interface GoogleAiOverviewReference {

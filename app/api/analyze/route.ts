@@ -8,6 +8,7 @@ import {
   evaluateScannabilityAndStructure,
 } from '../../../lib/scannability';
 import { calculateRankingChance } from '../../../lib/rankingChance';
+import { evaluateLanguageAlignment } from '../../../lib/language';
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
     // Determine user content and extract deterministic metrics
     let userTextContent = '';
     let userMetrics: StructuralAssetsMetrics;
+    let userHtmlLang: string | undefined;
 
     if (inputType === 'url') {
       if (!url || typeof url !== 'string' || !url.trim()) {
@@ -36,6 +38,7 @@ export async function POST(req: NextRequest) {
         const userPage = await readWebPage(url.trim(), true);
         userTextContent = `${userPage.title}\n\n${userPage.headings.join('\n')}\n\n${userPage.textExcerpt}`;
         userMetrics = userPage.metrics;
+        userHtmlLang = userPage.htmlLang;
       } catch (crawlErr: any) {
         return NextResponse.json(
           { success: false, error: crawlErr.message || 'your url is not crawlable' },
@@ -128,11 +131,26 @@ export async function POST(req: NextRequest) {
     );
     analysis.rankingChanceReport = rankingChanceReport;
 
-    // Merge extracted schema types & structural metrics back into the competitor items
+    // Step 6: Detect language of top 10 results vs user content
+    const competitorLangInputs = competitorPages.map((cp) => ({
+      title: cp.serp.title,
+      snippet: cp.serp.snippet,
+      htmlLang: cp.content.htmlLang,
+    }));
+    const languageAudit = evaluateLanguageAlignment(
+      userTextContent,
+      userHtmlLang,
+      competitorLangInputs,
+      location || 'global'
+    );
+    analysis.languageAudit = languageAudit;
+
+    // Merge extracted schema types, structural metrics & language back into the competitor items
     const enrichedCompetitors = competitorPages.map((cp) => ({
       ...cp.serp,
       schemaTypes: cp.content.schemaTypes || [],
       metrics: cp.content.metrics,
+      language: cp.content.language,
     }));
 
     return NextResponse.json({
@@ -143,6 +161,7 @@ export async function POST(req: NextRequest) {
       relatedSearches: serpData.relatedSearches || [],
       peopleAlsoAsk: serpData.peopleAlsoAsk || [],
       rankingChanceReport,
+      languageAudit,
     });
   } catch (error: any) {
     return NextResponse.json(

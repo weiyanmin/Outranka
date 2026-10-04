@@ -35,7 +35,15 @@ ${analysis.rankingChanceReport.topQueries.map((q, i) => `${i + 1}. **"${q.query}
 - **First-hand Quality Data (10%):** ${analysis.factorScores.firstHandDataBonus}%
 
 ${analysis.intentMismatch ? `\n> ⚠️ **Search Intent Mismatch Warning**\n> ${analysis.intentMismatchReason}\n> - User format: ${analysis.userPageType}\n> - Google prefers: ${analysis.topPagesType}\n` : ''}
+${analysis.languageAudit ? `
+---
 
+## SERP Language Alignment & Detection
+- **Your Content Language:** ${analysis.languageAudit.userLanguage.name} (${analysis.languageAudit.userLanguage.code.toUpperCase()})
+- **Google Favored SERP Language:** ${analysis.languageAudit.favoredSerpLanguage.name} (${analysis.languageAudit.favoredSerpLanguage.confidence}% of Top 10)
+- **Language Status:** ${analysis.languageAudit.isMismatch ? `⚠️ MISMATCH DETECTED (${analysis.languageAudit.mismatchSeverity.toUpperCase()})` : '✓ MATCH'}
+${analysis.languageAudit.isMismatch && analysis.languageAudit.warningMessage ? `> ⚠️ **Warning:** ${analysis.languageAudit.warningMessage}\n> **Recommendation:** ${analysis.languageAudit.recommendation}\n` : ''}
+` : ''}
 ---
 
 ## Top 3 Missing Topics
@@ -454,6 +462,14 @@ export function downloadAnalysisPdf(
     <div class="mismatch-alert">
       <strong>⚠️ Intent Mismatch Warning:</strong> ${analysis.intentMismatchReason}
       <div style="margin-top: 4px;">User: ${analysis.userPageType} | Google Expects: ${analysis.topPagesType}</div>
+    </div>
+  ` : ''}
+
+  ${analysis.languageAudit ? `
+    <div class="mismatch-alert" style="background: ${analysis.languageAudit.isMismatch ? '#fff7ed' : '#f0fdf4'}; border-color: ${analysis.languageAudit.isMismatch ? '#ea580c' : '#86efac'}; color: ${analysis.languageAudit.isMismatch ? '#9a3412' : '#166534'};">
+      <strong>${analysis.languageAudit.isMismatch ? '⚠️ Language Mismatch Detected:' : '✓ Language Alignment Confirmed:'}</strong> 
+      ${analysis.languageAudit.isMismatch ? analysis.languageAudit.warningMessage : `Content language (${analysis.languageAudit.userLanguage.name}) matches Google's favored language (${analysis.languageAudit.favoredSerpLanguage.confidence}% of top results).`}
+      ${analysis.languageAudit.recommendation ? `<div style="margin-top: 4px; font-size: 10px;">${analysis.languageAudit.recommendation}</div>` : ''}
     </div>
   ` : ''}
 

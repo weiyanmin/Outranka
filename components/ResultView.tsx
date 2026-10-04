@@ -3,6 +3,7 @@ import { AnalysisResult } from '../lib/analyze';
 import AiOverviewCard from './AiOverviewCard';
 import RelatedKeywordsCard from './RelatedKeywordsCard';
 import RankingChanceCard from './RankingChanceCard';
+import LanguageMismatchBanner from './LanguageMismatchBanner';
 
 interface ResultViewProps {
   analysis: AnalysisResult;
@@ -134,6 +135,11 @@ export default function ResultView({ analysis }: ResultViewProps) {
         {/* 2. Your Chance of Ranking in Google Score Card */}
         {analysis.rankingChanceReport && (
           <RankingChanceCard report={analysis.rankingChanceReport} />
+        )}
+
+        {/* Language Alignment & SERP Favoritism Banner */}
+        {analysis.languageAudit && (
+          <LanguageMismatchBanner languageAudit={analysis.languageAudit} />
         )}
 
         {/* 3. Intent Mismatch Alert Banner */}
