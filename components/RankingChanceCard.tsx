@@ -69,56 +69,12 @@ export default function RankingChanceCard({ report, variant = 'summary', span = 
     );
   }
 
-  const factors = [
-    { label: 'Search intent parity', value: report.calculatedFactors.searchIntentParity },
-    { label: 'DOM scannability', value: report.calculatedFactors.domScannability },
-    { label: 'Top 3 competitor overlap', value: report.calculatedFactors.top3CompetitorOverlap },
-    { label: 'Schema completeness', value: report.calculatedFactors.schemaCompleteness },
-  ];
-
   return (
     <SectionCard
       title="Ranking Chance by Query"
       subtitle="What is helping each query and the single best action to rank higher"
       span={span}
     >
-      {/* 4 Algorithmic Factors Sleek Strip */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-          gap: '12px',
-          marginBottom: '20px',
-        }}
-      >
-        {factors.map((f) => (
-          <div
-            key={f.label}
-            style={{
-              padding: '12px 14px',
-              background: 'var(--segmented-bg)',
-              borderRadius: '10px',
-              border: '1px solid var(--border-color)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)' }}>{f.label}</span>
-              <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-color)' }}>{f.value}%</span>
-            </div>
-            <div style={{ height: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 9999, overflow: 'hidden' }}>
-              <div
-                style={{
-                  width: `${f.value}%`,
-                  height: '100%',
-                  background: f.value >= 75 ? COLORS.success : f.value >= 50 ? COLORS.accent : COLORS.warning,
-                  borderRadius: 9999,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Clean Query Action Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {report.topQueries.map((q, idx) => {
