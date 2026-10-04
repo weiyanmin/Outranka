@@ -42,6 +42,16 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
 
   return (
     <div className="bento">
+      {analysis.intentMismatch && (
+        <div className="callout callout-warning">
+          <GoogleIcon name="warning" size={22} color="#b45309" />
+          <div className="callout-body">
+            <strong>Search Intent Mismatch Details:</strong>{' '}
+            {analysis.intentMismatchReason || 'Your page format does not match what Google favors for this keyword.'}
+          </div>
+        </div>
+      )}
+
       <SectionCard
         title="Search Intent"
         subtitle="What searchers want vs. the page type you wrote"
