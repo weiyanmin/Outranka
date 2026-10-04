@@ -80,15 +80,15 @@ Build mode: fast
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] Learning activity complete — brief evidence-based recap of the URL-to-ranking code path.
+- [x] Optional edit and transfer reflection addressed — kept code tour read-only; optional transfer question offered.
 - [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: Map generated from the current implementation and checked against actual source paths and symbols; guided code walkthrough and optional transfer reflection are pending.
-Route and stops: Reference route prepared: `app/page.tsx > Home > handleSubmit`, `app/api/analyze/route.ts > POST`, `lib/rankingMatch.ts > findSiteRankings`, and `app/results/page.tsx > ResultsPage`.
-Edit outcome: No optional app-code edit; wrap-up is kept read-only to avoid disturbing the mixed existing worktree.
-Reflection: Pending; personal response, if any, belongs only in the ignored profile.
-Activity mode: Guided route proposed; learner interaction pending.
+Activity and evidence: Brief source-based recap of `app/page.tsx > handleSubmit`, `lib/rankingMatch.ts > findSiteRankings`, and `app/results/page.tsx > ResultsPage`; the distinction between exact-page and same-host matches was explained. The production build passed, but no live SERP behavior was run during the recap.
+Route and stops: Reference route shared: `app/page.tsx > Home > handleSubmit`, `lib/rankingMatch.ts > findSiteRankings`, and `app/results/page.tsx > ResultsPage`.
+Edit outcome: No app-code edit; recap-only to preserve the mixed existing worktree.
+Reflection: Optional transfer question offered in chat; any personal response belongs only in the ignored profile.
+Activity mode: Brief evidence-based recap; no interactive editor walkthrough claimed.
 
 ## Revisions
 
