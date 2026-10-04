@@ -60,6 +60,22 @@ body {
   }
 }
 
+/* Top Hero Scores: Search Intent Score & Chance of Ranking side by side */
+.hero-scores-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 992px) {
+  .hero-scores-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+}
+
 /* Responsive Dashboard Grid for Results */
 .results-grid {
   display: grid;

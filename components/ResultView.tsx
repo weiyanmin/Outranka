@@ -34,64 +34,77 @@ export default function ResultView({ analysis }: ResultViewProps) {
   const intentStyle = getIntentBadgeColor(analysis.intentCategory);
 
   return (
-    <div className="results-grid">
-      {/* Primary Column (Left) */}
-      <div className="results-col-primary">
-        {/* 1. Primary Score Card */}
-        <div className="card" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-            <span
+    <div>
+      {/* Top Hero Section: Search Intent Score & Chance of Ranking in Google Side by Side */}
+      <div className="hero-scores-grid">
+        {/* 1. Search Intent Score Card */}
+        <div
+          className="card"
+          style={{
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--muted-text)',
+                }}
+              >
+                Search Intent Score
+              </span>
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  background: intentStyle.bg,
+                  color: intentStyle.color,
+                  border: `1px solid ${intentStyle.border}`,
+                  padding: '2px 9px',
+                  borderRadius: '9999px',
+                }}
+              >
+                {analysis.intentCategory} Intent
+              </span>
+            </div>
+
+            <div
               style={{
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--muted-text)',
+                fontSize: '4.2rem',
+                fontWeight: 800,
+                lineHeight: 1,
+                letterSpacing: '-0.04em',
+                color: getScoreColor(analysis.score),
+                margin: '10px 0 8px 0',
               }}
             >
-              Search Intent Score
-            </span>
-            <span
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                background: intentStyle.bg,
-                color: intentStyle.color,
-                border: `1px solid ${intentStyle.border}`,
-                padding: '2px 9px',
-                borderRadius: '9999px',
-              }}
-            >
-              {analysis.intentCategory} Intent
-            </span>
+              {analysis.score}%
+            </div>
+
+            <p style={{ fontSize: '0.98rem', fontWeight: 600, color: 'var(--text-color)', maxWidth: '440px', margin: '0 auto' }}>
+              {analysis.score >= 80
+                ? 'Strong intent parity with the top Google results.'
+                : analysis.score >= 50
+                ? `Satisfies ${analysis.score}% of target intent. Good foundation with key topic gaps.`
+                : 'Significant intent mismatch compared to top ranking competitors.'}
+            </p>
+
+            <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginTop: '8px', lineHeight: 1.4 }}>
+              Target Intent: <span style={{ color: 'var(--text-color)', fontWeight: 500 }}>{analysis.keywordIntent}</span>
+            </p>
           </div>
-
-          <div
-            style={{
-              fontSize: '4.2rem',
-              fontWeight: 800,
-              lineHeight: 1,
-              letterSpacing: '-0.04em',
-              color: getScoreColor(analysis.score),
-              margin: '10px 0 8px 0',
-            }}
-          >
-            {analysis.score}%
-          </div>
-
-          <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-color)', maxWidth: '480px', margin: '0 auto' }}>
-            {analysis.score >= 80
-              ? 'Strong intent parity with the top Google results.'
-              : analysis.score >= 50
-              ? `Satisfies ${analysis.score}% of target intent. Good foundation with key topic gaps.`
-              : 'Significant intent mismatch compared to top ranking competitors.'}
-          </p>
-
-          <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginTop: '8px', lineHeight: 1.4 }}>
-            Target Intent: <span style={{ color: 'var(--text-color)', fontWeight: 500 }}>{analysis.keywordIntent}</span>
-          </p>
 
           {/* Factors Breakdown Grid */}
           <div
@@ -99,13 +112,13 @@ export default function ResultView({ analysis }: ResultViewProps) {
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
               gap: '12px',
-              marginTop: '24px',
-              paddingTop: '20px',
+              marginTop: '20px',
+              paddingTop: '18px',
               borderTop: '1px solid var(--border-color)',
             }}
           >
             <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
                 {analysis.intentCategory} Intent Match (50%)
               </span>
               <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
@@ -113,19 +126,19 @@ export default function ResultView({ analysis }: ResultViewProps) {
               </span>
             </div>
             <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>Structure (25%)</span>
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>Structure (25%)</span>
               <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
                 {analysis.factorScores.structure}%
               </span>
             </div>
             <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>Readability (15%)</span>
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>Readability (15%)</span>
               <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
                 {analysis.factorScores.readability}%
               </span>
             </div>
             <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>First-hand Data (10%)</span>
+              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>First-hand Data (10%)</span>
               <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
                 {analysis.factorScores.firstHandDataBonus}%
               </span>
@@ -133,15 +146,21 @@ export default function ResultView({ analysis }: ResultViewProps) {
           </div>
         </div>
 
-        {/* 2. Your Chance of Ranking in Google Score Card */}
+        {/* 2. Chance of Ranking in Google Score Card */}
         {analysis.rankingChanceReport && (
           <RankingChanceCard report={analysis.rankingChanceReport} />
         )}
+      </div>
 
-        {/* Language Alignment & SERP Favoritism Banner */}
-        {analysis.languageAudit && (
-          <LanguageMismatchBanner languageAudit={analysis.languageAudit} />
-        )}
+      {/* Language Alignment & SERP Favoritism Banner */}
+      {analysis.languageAudit && (
+        <LanguageMismatchBanner languageAudit={analysis.languageAudit} />
+      )}
+
+      {/* Detailed Technical Audits & Findings Grid */}
+      <div className="results-grid" style={{ marginTop: 0 }}>
+        {/* Primary Column (Left) */}
+        <div className="results-col-primary">
 
         {/* 3. Intent Mismatch Alert Banner */}
         {analysis.intentMismatch && (
@@ -477,5 +496,6 @@ export default function ResultView({ analysis }: ResultViewProps) {
         )}
       </div>
     </div>
+  </div>
   );
 }

@@ -28,7 +28,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
   const tierStyle = getTierColor(report.tier);
 
   return (
-    <div className="card" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div className="card" style={{ position: 'relative', overflow: 'hidden', margin: 0, display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div
         style={{
