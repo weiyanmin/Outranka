@@ -53,7 +53,7 @@ export default function ResultView({ analysis, competitors = [] }: ResultViewPro
 
   const tabs: DashboardTab[] = [
     { id: 'overview', label: 'Overview', icon: 'bar_chart' },
-    { id: 'intent', label: 'Search Intent', icon: 'track_changes', alert: analysis.intentMismatch },
+    { id: 'intent', label: 'Search Intent', icon: 'manage_search', alert: analysis.intentMismatch },
     { id: 'content', label: 'Content & UX', icon: 'toc', alert: hasUxAlert },
     { id: 'opportunities', label: 'Opportunities', icon: 'lightbulb', count: analysis.missingTopics?.length || undefined },
     { id: 'ai', label: 'AI & Language', icon: 'auto_awesome', alert: !!analysis.languageAudit?.isMismatch },

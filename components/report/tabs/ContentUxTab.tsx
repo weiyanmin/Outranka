@@ -4,7 +4,7 @@ import React from 'react';
 import { AnalysisResult } from '../../../lib/analyze';
 import GoogleIcon from '../../GoogleIcon';
 import RingGauge from '../../charts/RingGauge';
-import CompareBars from '../../charts/CompareBars';
+import CompareTable from '../../charts/CompareTable';
 import { COLORS } from '../../charts/colors';
 import SectionCard from '../SectionCard';
 import Pill from '../Pill';
@@ -176,12 +176,12 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
 
   return (
     <div className="bento">
-      <SectionCard title="Scannability Score" subtitle="Structure of your draft vs. top results" span={4}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '28px' }}>
+      <SectionCard title="Scannability Score" subtitle="Structure of your draft vs. top results" span={12}>
+        <div className="scannability-score-layout">
           <RingGauge value={audit.scannabilityScore} size={170} stroke={13} caption="Score" />
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="scannability-score-status">
             {statusRows.map((r) => (
-              <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.88rem' }}>
+              <div key={r.label} className="scannability-score-row">
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', color: 'var(--text-color)' }}>
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: r.color }} />
                   {r.label}
@@ -193,8 +193,8 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
         </div>
       </SectionCard>
 
-      <SectionCard title="You vs. Top 10 Average" subtitle="Headings, media and depth compared to what ranks" span={8}>
-        <CompareBars
+      <SectionCard title="You vs. Top 10 Average" subtitle="Compare your page with the average across the ranking results" span={12}>
+        <CompareTable
           rows={[
             { label: 'H2 headings', you: u.h2Count, benchmark: a.avgH2Count },
             { label: 'H3 headings', you: u.h3Count, benchmark: a.avgH3Count },

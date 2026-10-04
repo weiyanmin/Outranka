@@ -61,7 +61,7 @@ export default function RankingChanceCard({ report, variant = 'summary', span = 
         {onNavigate && report.topQueries.length > 0 && (
           <div style={{ marginTop: '20px' }}>
             <button type="button" className="link-btn" onClick={() => onNavigate('intent')}>
-              See all {report.topQueries.length} queries and how to rank higher →
+              See all {report.topQueries.length} queries and how to rank higher <GoogleIcon name="arrow_forward" size={14} color="currentColor" />
             </button>
           </div>
         )}

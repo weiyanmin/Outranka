@@ -23,6 +23,34 @@ const INTENT_TONE: Record<SearchIntentCategory, Tone> = {
   Navigational: 'neutral',
 };
 
+function formatUrlBreadcrumb(rawUrl: string): string {
+  if (!rawUrl) return 'URL unavailable';
+
+  try {
+    const parsed = new URL(rawUrl);
+    const domain = parsed.hostname.replace(/^www\./i, '');
+    const pathSegments = parsed.pathname
+      .split('/')
+      .filter(Boolean)
+      .map((segment) => {
+        try {
+          return decodeURIComponent(segment).replace(/[-_]+/g, ' ');
+        } catch {
+          return segment;
+        }
+      });
+
+    // Keep the breadcrumb scannable while retaining the first and last useful path segments.
+    const visiblePath = pathSegments.length > 3
+      ? [pathSegments[0], '…', pathSegments[pathSegments.length - 1]]
+      : pathSegments;
+
+    return [domain, ...visiblePath].join(' > ');
+  } catch {
+    return rawUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '');
+  }
+}
+
 export default function CompetitorList({ competitors, competitorIntents, aiOverview, span = 12 }: CompetitorListProps) {
   if (!competitors || competitors.length === 0) return null;
 
@@ -50,6 +78,9 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
         {competitors.map((item, idx) => {
           const intent = getIntent(item.position, item.link);
           const m = item.metrics;
+          const isEnglishDefault = !item.language ||
+            item.language.code.toLowerCase() === 'en' ||
+            item.language.name.toLowerCase() === 'english';
           const stats = m
             ? [
                 `${m.h2Count} H2`,
@@ -76,17 +107,20 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontWeight: 600, fontSize: '0.98rem', lineHeight: 1.4, color: 'var(--text-color)', textDecoration: 'none' }}
-                  onMouseOver={(e) => (e.currentTarget.style.color = 'var(--accent-color)')}
-                  onMouseOut={(e) => (e.currentTarget.style.color = 'var(--text-color)')}
+                  className="competitor-title"
                 >
                   {item.title}
                 </a>
-                <div
-                  style={{ fontSize: '0.78rem', color: 'var(--muted-text)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="competitor-url"
+                  title={item.link}
+                  aria-label={`Open ${item.link}`}
                 >
-                  {item.link}
-                </div>
+                  {formatUrlBreadcrumb(item.link)}
+                </a>
 
                 {item.snippet && (
                   <p style={{ fontSize: '0.86rem', color: 'var(--text-color)', opacity: 0.85, lineHeight: 1.5, marginTop: 8 }}>{item.snippet}</p>
@@ -95,7 +129,7 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: 12 }}>
                   {intent && <Pill tone={INTENT_TONE[intent]}>{intent}</Pill>}
                   {isCitedByAi(item) && <Pill tone="accent">Cited in AI Overview</Pill>}
-                  {item.language && <Pill tone="neutral">{item.language.name}</Pill>}
+                  {!isEnglishDefault && item.language && <Pill tone="neutral">{item.language.name}</Pill>}
                   {item.schemaTypes?.map((st) => (
                     <a
                       key={st}
@@ -108,11 +142,7 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                       <Pill tone="neutral">
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                           {st}
-                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                            <polyline points="15 3 21 3 21 9"></polyline>
-                            <line x1="10" y1="14" x2="21" y2="3"></line>
-                          </svg>
+                          <GoogleIcon name="open_in_new" size={10} color="currentColor" />
                         </span>
                       </Pill>
                     </a>
@@ -120,8 +150,8 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                 </div>
 
                 {stats.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 12, fontSize: '0.8rem', color: 'var(--muted-text)' }}>
-                    <GoogleIcon name="bar_chart" size={14} color="currentColor" />
+                  <div className="competitor-stats">
+                    <GoogleIcon name="toc" size={14} color="currentColor" />
                     {stats.map((s, i) => (
                       <React.Fragment key={s}>
                         {i > 0 && <span>·</span>}

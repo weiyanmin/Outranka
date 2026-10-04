@@ -90,7 +90,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
             <strong>Search Intent Mismatch Detected</strong>
           </div>
           <button type="button" className="link-btn" onClick={() => onNavigate('intent')}>
-            View details →
+            View details <GoogleIcon name="arrow_forward" size={14} color="currentColor" />
           </button>
         </div>
       )}
@@ -102,7 +102,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
             your content is in {analysis.languageAudit.userLanguage.name}.
           </div>
           <button type="button" className="link-btn" onClick={() => onNavigate('ai')}>
-            View details →
+            View details <GoogleIcon name="arrow_forward" size={14} color="currentColor" />
           </button>
         </div>
       )}
@@ -203,9 +203,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
               }}
             >
               Learn more
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <GoogleIcon name="expand_more" size={13} color="currentColor" />
             </button>
           </div>
         ) : (
@@ -264,7 +262,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
           {recs.length > 3 && (
             <div style={{ marginTop: '20px' }}>
               <button type="button" className="link-btn" onClick={() => onNavigate('opportunities')}>
-                See all {recs.length} recommendations →
+                See all {recs.length} recommendations <GoogleIcon name="arrow_forward" size={14} color="currentColor" />
               </button>
             </div>
           )}

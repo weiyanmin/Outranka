@@ -29,7 +29,7 @@ export default function LoadingSteps({ keyword }: LoadingStepsProps) {
     <div className="card" style={{ marginTop: '24px' }}>
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>
         <div className="badge-pill">
-          <span>●</span> In Progress
+          <GoogleIcon name="progress_activity" size={13} color="currentColor" className="icon-spin" /> In Progress
         </div>
         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-color)' }}>
           Auditing &quot;{keyword}&quot;

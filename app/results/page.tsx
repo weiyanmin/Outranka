@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import ResultView from '../../components/ResultView';
 import GoogleIcon from '../../components/GoogleIcon';
+import BrandMark from '../../components/BrandMark';
+import AccountControl from '../../components/auth/AccountControl';
 import { AnalysisResult } from '../../lib/analyze';
 import { SerpResultItem } from '../../lib/serp';
 import { downloadAnalysisMarkdown, downloadAnalysisPdf } from '../../lib/downloadReport';
@@ -124,9 +126,7 @@ export default function ResultsPage() {
         <div className="results-nav-inner">
           <div className="results-nav-left">
             <Link href="/" className="results-nav-brand" title="Outranka - Back to Home">
-              <span className="results-nav-logo-mark">
-                <GoogleIcon name="auto_awesome" size={17} color="#ffffff" />
-              </span>
+              <BrandMark size={30} className="results-nav-logo-mark" />
               <span>Outranka</span>
             </Link>
 
@@ -143,6 +143,7 @@ export default function ResultsPage() {
           </div>
 
           <div className="results-nav-actions">
+            <AccountControl />
             <Link href="/" className="results-nav-btn results-nav-btn-secondary" title="Start a new search intent audit">
               <GoogleIcon name="arrow_back" size={15} color="currentColor" />
               <span>New Audit</span>
@@ -155,28 +156,17 @@ export default function ResultsPage() {
                 aria-expanded={isDownloadOpen}
                 aria-haspopup="true"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
+                <GoogleIcon name="download" size={15} color="currentColor" />
                 <span>Download Report</span>
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <GoogleIcon
+                  name="expand_more"
+                  size={13}
+                  color="currentColor"
                   style={{
                     transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                     transform: isDownloadOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                   }}
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                />
               </button>
 
               {/* Dropdown Menu */}
@@ -201,7 +191,7 @@ export default function ResultsPage() {
                         flexShrink: 0,
                       }}
                     >
-                      MD
+                      <GoogleIcon name="description" size={15} color="currentColor" />
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>Download as Markdown</span>
@@ -228,7 +218,7 @@ export default function ResultsPage() {
                         flexShrink: 0,
                       }}
                     >
-                      PDF
+                      <GoogleIcon name="picture_as_pdf" size={15} color="currentColor" />
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>Download as PDF</span>

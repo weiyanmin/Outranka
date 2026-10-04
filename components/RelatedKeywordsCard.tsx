@@ -128,7 +128,7 @@ export default function RelatedKeywordsCard({ relatedSearches = [], peopleAlsoAs
                     rel="noopener noreferrer"
                     style={{ display: 'inline-block', marginTop: 6, fontSize: '0.78rem', color: 'var(--accent-color)', textDecoration: 'none' }}
                   >
-                    Source: {q.title} →
+                    Source: {q.title} <GoogleIcon name="arrow_forward" size={13} color="currentColor" />
                   </a>
                 )}
               </div>

@@ -286,29 +286,16 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
       <button type="submit" className="submit-button" disabled={isLoading}>
         {isLoading ? (
           <>
-            <svg style={{ animation: 'spin 1s linear infinite', width: '18px', height: '18px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
-              <path d="M12 2a10 10 0 0 1 10 10" />
-            </svg>
+            <GoogleIcon name="progress_activity" size={18} color="currentColor" className="icon-spin" />
             Analyzing Competitors...
           </>
         ) : (
           <>
             Analyze Against Top 10 Results
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
+            <GoogleIcon name="arrow_forward" size={16} color="currentColor" />
           </>
         )}
       </button>
-
-      <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </form>
   );
 }
