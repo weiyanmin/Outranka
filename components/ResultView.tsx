@@ -4,6 +4,7 @@ import AiOverviewCard from './AiOverviewCard';
 import RelatedKeywordsCard from './RelatedKeywordsCard';
 import RankingChanceCard from './RankingChanceCard';
 import LanguageMismatchBanner from './LanguageMismatchBanner';
+import GoogleIcon from './GoogleIcon';
 
 interface ResultViewProps {
   analysis: AnalysisResult;
@@ -153,7 +154,7 @@ export default function ResultView({ analysis }: ResultViewProps) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+              <GoogleIcon name="warning" size={20} color="#b45309" />
               <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#92400e' }}>
                 Search Intent Mismatch Warning
               </span>
@@ -177,7 +178,7 @@ export default function ResultView({ analysis }: ResultViewProps) {
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: 'var(--accent-color)', fontSize: '1.2rem' }}>⚡</span>
+                <GoogleIcon name="bolt" size={20} color="var(--accent-color)" />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
                   UI, UX &amp; Scannability Deterministic Check
                 </h3>
@@ -321,7 +322,7 @@ export default function ResultView({ analysis }: ResultViewProps) {
         {/* 4. Top 3 Missing Topics Card */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span style={{ color: 'var(--accent-color)', fontSize: '1.1rem' }}>✦</span>
+            <GoogleIcon name="lightbulb" size={20} color="var(--accent-color)" />
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
               Top 3 Topics You Are Missing
             </h3>

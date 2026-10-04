@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { RelatedSearchItem, PeopleAlsoAskItem } from '../lib/serp';
+import GoogleIcon from './GoogleIcon';
 
 interface RelatedKeywordsCardProps {
   relatedSearches?: RelatedSearchItem[];
@@ -42,7 +43,7 @@ export default function RelatedKeywordsCard({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '1.2rem', color: 'var(--accent-color)' }}>🔍</span>
+          <GoogleIcon name="search" size={20} color="var(--accent-color)" />
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
             Google Related Searches &amp; Questions
           </h3>
@@ -144,7 +145,7 @@ export default function RelatedKeywordsCard({
                   e.currentTarget.style.color = 'var(--text-color)';
                 }}
               >
-                <span>🔍</span>
+                <GoogleIcon name="search" size={13} color="currentColor" />
                 <span>{item.query}</span>
               </a>
             ))}
@@ -158,7 +159,7 @@ export default function RelatedKeywordsCard({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '4px',
                   background: 'transparent',
                   color: 'var(--accent-color)',
                   border: 'none',
@@ -169,9 +170,15 @@ export default function RelatedKeywordsCard({
                 }}
               >
                 {isExpanded ? (
-                  <>Show Less ▲</>
+                  <>
+                    <span>Show Less</span>
+                    <GoogleIcon name="expand_less" size={16} color="var(--accent-color)" />
+                  </>
                 ) : (
-                  <>See More ({relatedSearches.length - 4} more keywords) ▼</>
+                  <>
+                    <span>See More ({relatedSearches.length - 4} more keywords)</span>
+                    <GoogleIcon name="expand_more" size={16} color="var(--accent-color)" />
+                  </>
                 )}
               </button>
             </div>
@@ -245,7 +252,7 @@ export default function RelatedKeywordsCard({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '4px',
                   background: 'transparent',
                   color: 'var(--accent-color)',
                   border: 'none',
@@ -256,9 +263,15 @@ export default function RelatedKeywordsCard({
                 }}
               >
                 {isExpanded ? (
-                  <>Show Less ▲</>
+                  <>
+                    <span>Show Less</span>
+                    <GoogleIcon name="expand_less" size={16} color="var(--accent-color)" />
+                  </>
                 ) : (
-                  <>See More ({peopleAlsoAsk.length - 3} more questions) ▼</>
+                  <>
+                    <span>See More ({peopleAlsoAsk.length - 3} more questions)</span>
+                    <GoogleIcon name="expand_more" size={16} color="var(--accent-color)" />
+                  </>
                 )}
               </button>
             </div>

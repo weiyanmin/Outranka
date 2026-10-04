@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { GoogleAiOverviewData } from '../lib/serp';
+import GoogleIcon from './GoogleIcon';
 
 interface AiOverviewCardProps {
   aiOverview?: GoogleAiOverviewData;
@@ -49,7 +50,7 @@ export default function AiOverviewCard({ aiOverview }: AiOverviewCardProps) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '1.25rem' }}>✨</span>
+          <GoogleIcon name="auto_awesome" size={20} color="var(--accent-color)" />
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
             Google AI Overview &amp; Citations
           </h3>
@@ -248,9 +249,13 @@ export default function AiOverviewCard({ aiOverview }: AiOverviewCardProps) {
                     fontSize: '0.72rem',
                     color: 'var(--accent-color)',
                     fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
                   }}
                 >
-                  ✓ {aiOverview.organicCompetitorOverlapCount} of Top 10 competitors are cited
+                  <GoogleIcon name="check_circle" size={13} color="var(--accent-color)" />
+                  <span>{aiOverview.organicCompetitorOverlapCount} of Top 10 competitors are cited</span>
                 </div>
               )}
             </div>

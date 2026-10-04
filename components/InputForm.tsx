@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { COUNTRIES } from '../lib/countries';
+import GoogleIcon from './GoogleIcon';
 
 export interface FormSubmitData {
   keyword: string;
@@ -265,11 +266,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
             />
             {urlWarning ? (
               <div className="inline-field-warning">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
+                <GoogleIcon name="warning" size={15} color="var(--error-text)" />
                 <span>{urlWarning}</span>
               </div>
             ) : (
@@ -281,7 +278,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
 
       {error && (
         <div className="error-banner">
-          <span style={{ fontSize: '1rem' }}>⚠️</span>
+          <GoogleIcon name="warning" size={18} color="var(--error-text)" />
           <span>{error}</span>
         </div>
       )}

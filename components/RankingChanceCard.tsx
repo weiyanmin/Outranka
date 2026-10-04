@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { RankingChanceReport } from '../lib/rankingChance';
+import GoogleIcon from './GoogleIcon';
 
 interface RankingChanceCardProps {
   report?: RankingChanceReport;
@@ -40,7 +41,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '1.3rem' }}>🎯</span>
+          <GoogleIcon name="track_changes" size={24} color={tierStyle.text} />
           <div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em', margin: 0 }}>
               Chance of Ranking in Google
@@ -216,9 +217,15 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                 </div>
 
                 {/* Actionable Insights */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', fontSize: '0.76rem', color: 'var(--muted-text)', marginTop: '2px' }}>
-                  <span>✓ Advantage: <span style={{ color: 'var(--text-color)', fontWeight: 500 }}>{q.keyAdvantage}</span></span>
-                  <span>⚡ To Rank: <span style={{ color: 'var(--accent-color)', fontWeight: 600 }}>{q.actionToRankHigher}</span></span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: '0.76rem', color: 'var(--muted-text)', marginTop: '2px' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <GoogleIcon name="check" size={12} color="#16a34a" />
+                    <span>Advantage: <strong style={{ color: 'var(--text-color)', fontWeight: 600 }}>{q.keyAdvantage}</strong></span>
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <GoogleIcon name="bolt" size={12} color="var(--accent-color)" />
+                    <span>To Rank: <strong style={{ color: 'var(--accent-color)', fontWeight: 600 }}>{q.actionToRankHigher}</strong></span>
+                  </span>
                 </div>
               </div>
             );

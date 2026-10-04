@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import ResultView from '../../components/ResultView';
 import CompetitorList from '../../components/CompetitorList';
+import GoogleIcon from '../../components/GoogleIcon';
 import { AnalysisResult } from '../../lib/analyze';
 import { SerpResultItem } from '../../lib/serp';
 import { downloadAnalysisMarkdown, downloadAnalysisPdf } from '../../lib/downloadReport';
@@ -86,7 +87,9 @@ export default function ResultsPage() {
   if (!analysis || !query) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
-        <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '12px' }}>📊</span>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+          <GoogleIcon name="bar_chart" size={44} color="var(--accent-color)" />
+        </div>
         <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '8px' }}>
           No Active Audit Found
         </h2>
@@ -108,7 +111,8 @@ export default function ResultsPage() {
             fontSize: '0.95rem',
           }}
         >
-          ← Start New Audit
+          <GoogleIcon name="arrow_back" size={16} color="#ffffff" />
+          <span>Start New Audit</span>
         </Link>
       </div>
     );
@@ -144,7 +148,8 @@ export default function ResultsPage() {
             transition: 'all 0.15s ease',
           }}
         >
-          ← New Audit
+          <GoogleIcon name="arrow_back" size={15} color="var(--muted-text)" />
+          <span>New Audit</span>
         </Link>
 
         {/* Download Report Dropdown */}

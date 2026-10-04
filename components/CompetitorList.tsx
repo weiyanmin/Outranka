@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { SerpResultItem, GoogleAiOverviewData } from '../lib/serp';
 import { CompetitorIntentInfo } from '../lib/analyze';
 import { SearchIntentCategory } from '../lib/scoring';
+import GoogleIcon from './GoogleIcon';
 
 interface CompetitorListProps {
   competitors: SerpResultItem[];
@@ -140,7 +141,8 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                         flexShrink: 0,
                       }}
                     >
-                      ✨ Cited in AI Overview
+                      <GoogleIcon name="auto_awesome" size={13} color="var(--accent-color)" />
+                      <span>Cited in AI Overview</span>
                     </span>
                   )}
 
@@ -157,11 +159,12 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                       borderRadius: '9999px',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '3px',
+                      gap: '4px',
                       flexShrink: 0,
                     }}
                   >
-                    🌐 {item.language.name}
+                    <GoogleIcon name="language" size={13} color="var(--muted-text)" />
+                    <span>{item.language.name}</span>
                   </span>
                 )}
               </div>
@@ -265,9 +268,13 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                       border: '1px solid var(--border-color)',
                       padding: '2px 7px',
                       borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}
                   >
-                    🖼️ {item.metrics.imageCount} {item.metrics.imageCount === 1 ? 'img' : 'imgs'}
+                    <GoogleIcon name="image" size={13} color="currentColor" />
+                    <span>{item.metrics.imageCount} {item.metrics.imageCount === 1 ? 'img' : 'imgs'}</span>
                   </span>
 
                   <span
@@ -279,9 +286,13 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                       border: item.metrics.videoCount > 0 ? '1px solid rgba(40, 167, 156, 0.3)' : '1px solid var(--border-color)',
                       padding: '2px 7px',
                       borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}
                   >
-                    🎥 {item.metrics.videoCount} {item.metrics.videoCount === 1 ? 'vid' : 'vids'}
+                    <GoogleIcon name="videocam" size={13} color="currentColor" />
+                    <span>{item.metrics.videoCount} {item.metrics.videoCount === 1 ? 'vid' : 'vids'}</span>
                   </span>
 
                   <span
@@ -293,9 +304,13 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                       border: item.metrics.hasTableOfContents ? '1px solid rgba(22, 163, 74, 0.25)' : '1px solid var(--border-color)',
                       padding: '2px 7px',
                       borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
                     }}
                   >
-                    📑 {item.metrics.hasTableOfContents ? 'TOC' : 'No TOC'}
+                    <GoogleIcon name="toc" size={13} color="currentColor" />
+                    <span>{item.metrics.hasTableOfContents ? 'TOC' : 'No TOC'}</span>
                   </span>
                 </div>
               )}

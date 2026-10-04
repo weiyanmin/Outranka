@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { LanguageAuditResult } from '../lib/language';
+import GoogleIcon from './GoogleIcon';
 
 interface LanguageMismatchBannerProps {
   languageAudit?: LanguageAuditResult;
@@ -29,7 +30,7 @@ export default function LanguageMismatchBanner({ languageAudit }: LanguageMismat
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.3rem' }}>🌐</span>
+            <GoogleIcon name="language" size={22} color="#9a3412" />
             <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9a3412', margin: 0, letterSpacing: '-0.01em' }}>
               SERP Language Mismatch Detected
             </h3>
@@ -119,7 +120,7 @@ export default function LanguageMismatchBanner({ languageAudit }: LanguageMismat
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span>🌐</span>
+        <GoogleIcon name="language" size={17} color="#166534" />
         <span style={{ color: '#166534', fontWeight: 600 }}>
           Language Match: Google favors <strong>{favoredSerpLanguage.name}</strong> for this query &amp; location, which matches your content.
         </span>

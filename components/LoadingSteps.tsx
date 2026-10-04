@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import GoogleIcon from './GoogleIcon';
 
 interface LoadingStepsProps {
   keyword: string;
@@ -74,7 +75,7 @@ export default function LoadingSteps({ keyword }: LoadingStepsProps) {
                   border: isCurrent ? '2px solid var(--accent-color)' : 'none',
                 }}
               >
-                {isDone ? '✓' : idx + 1}
+                {isDone ? <GoogleIcon name="check" size={13} color="#ffffff" /> : idx + 1}
               </div>
 
               <div>
