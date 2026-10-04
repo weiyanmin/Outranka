@@ -1,5 +1,6 @@
 import { AnalysisResult } from './analyze';
 import { SerpResultItem } from './serp';
+import { getSchemaOrgUrl } from './schema';
 
 export function downloadAnalysisMarkdown(
   query: { keyword: string; location: string; inputType: string },
@@ -63,7 +64,7 @@ ${analysis.suggestedStructure.map((s) => `### [${s.level || 'H2'}] ${s.heading}\
 ---
 
 ## Recommended Schema Types
-${analysis.suggestedSchema.map((sch) => `- **${sch.type}**: ${sch.reason}`).join('\n')}
+${analysis.suggestedSchema.map((sch) => `- **[${sch.type}](${getSchemaOrgUrl(sch.type)})**: ${sch.reason}`).join('\n')}
 
 ---
 

@@ -7,6 +7,7 @@ import { SearchIntentCategory } from '../lib/scoring';
 import GoogleIcon from './GoogleIcon';
 import SectionCard from './report/SectionCard';
 import Pill, { Tone } from './report/Pill';
+import { getSchemaOrgUrl } from '../lib/schema';
 
 interface CompetitorListProps {
   competitors: SerpResultItem[];
@@ -96,9 +97,25 @@ export default function CompetitorList({ competitors, competitorIntents, aiOverv
                   {isCitedByAi(item) && <Pill tone="accent">Cited in AI Overview</Pill>}
                   {item.language && <Pill tone="neutral">{item.language.name}</Pill>}
                   {item.schemaTypes?.map((st) => (
-                    <Pill key={st} tone="neutral">
-                      {st}
-                    </Pill>
+                    <a
+                      key={st}
+                      href={getSchemaOrgUrl(st)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ textDecoration: 'none' }}
+                      title={`View ${st} on schema.org`}
+                    >
+                      <Pill tone="neutral">
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          {st}
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                          </svg>
+                        </span>
+                      </Pill>
+                    </a>
                   ))}
                 </div>
 
