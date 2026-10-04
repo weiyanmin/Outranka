@@ -72,23 +72,24 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [ ] Early usable behavior explored — after slice 3, when the real score first appears and can shape the remaining slices
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Final kick-the-tires exploration and feedback completed — learner said, “I think all good now”; no revisions requested.
 
 ## Final Review
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — learner confirmed the app is good to go; no final-review fixes requested.
 
 ## Code Tour and App Map
 
 - [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: [what actually happened; real document/test/code references; unfinished work if interrupted]
-Route and stops: [actual paths and symbols; guided stops completed, or reference-only route]
-Edit outcome: [tried/kept/reverted/declined/not applicable; verification if changed]
-Reflection: [offered/answered/declined/already covered — personal answer belongs only in the ignored profile]
-Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
+Activity and evidence: Map generated from the current implementation and checked against actual source paths and symbols; guided code walkthrough and optional transfer reflection are pending.
+Route and stops: Reference route prepared: `app/page.tsx > Home > handleSubmit`, `app/api/analyze/route.ts > POST`, `lib/rankingMatch.ts > findSiteRankings`, and `app/results/page.tsx > ResultsPage`.
+Edit outcome: No optional app-code edit; wrap-up is kept read-only to avoid disturbing the mixed existing worktree.
+Reflection: Pending; personal response, if any, belongs only in the ignored profile.
+Activity mode: Guided route proposed; learner interaction pending.
 
 ## Revisions
 
+- The planned early usable-behavior checkpoint after slice 3 was not recorded at that point. It remains unchecked rather than being backdated; the final full-app review is separately completed.

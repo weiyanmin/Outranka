@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Outranka — App Map</title>
+  <style>
+    :root { color-scheme: light; --ink: #19212b; --muted: #526071; --line: #dce3e8; --surface: #fff; --wash: #f4f7f8; --teal: #176f68; --teal-soft: #eaf6f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--wash); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { width: min(1040px, calc(100% - 32px)); margin: 36px auto 64px; }
+    header, section { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-bottom: 18px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.035em; }
+    h2 { margin-bottom: 8px; font-size: 1.25rem; }
+    h3 { margin: 0 0 7px; font-size: 1rem; }
+    p, li { color: var(--muted); }
+    code { color: #145b55; background: #eef6f5; border-radius: 5px; padding: 2px 5px; overflow-wrap: anywhere; }
+    .eyebrow { margin-bottom: 10px; color: var(--teal); font-size: .76rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: stretch; margin-top: 18px; }
+    .node { min-width: 0; position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .node:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; right: -12px; top: 50%; transform: translate(50%, -50%); width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--teal); color: white; font-weight: 700; }
+    .node strong { display: block; margin-bottom: 5px; }
+    .node small { display: block; color: var(--muted); line-height: 1.45; }
+    .route { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 16px; }
+    .stop { padding: 16px; border-radius: 12px; background: var(--wash); }
+    .stop .number { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-bottom: 10px; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 750; }
+    .changes { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 10px 18px; padding: 0; list-style: none; }
+    .changes li { margin: 0; padding: 12px; border-left: 3px solid var(--teal); background: var(--wash); }
+    .practice { border-left: 4px solid var(--teal); padding: 14px 18px; background: var(--teal-soft); border-radius: 0 10px 10px 0; }
+    .note { font-size: .88rem; }
+    a { color: var(--teal); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:focus-visible { outline: 3px solid #135c56; outline-offset: 3px; border-radius: 3px; }
+    @media (max-width: 720px) { main { margin-top: 16px; } header, section { padding: 18px; } .flow { grid-template-columns: 1fr; } .node:not(:last-child)::after { content: "↓"; top: auto; right: 50%; bottom: -12px; transform: translate(50%, 50%); } }
+    @media print { body { background: white; } main { width: 100%; margin: 0; } header, section { break-inside: avoid; box-shadow: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">A quick map of the working app</p>
+      <h1>Outranka</h1>
+      <p>Outranka compares a submitted draft or web page with Google organic results for a keyword and region. It returns content recommendations, quality checks, competitor details, and a downloadable report; signed-in users can revisit saved audits.</p>
+    </header>
+
+    <section aria-labelledby="flow-title">
+      <h2 id="flow-title">One audit, from input to result</h2>
+      <p>Follow the same path when changing how an audit is submitted, analyzed, saved, or shown.</p>
+      <div class="flow" role="img" aria-label="Audit form submits to the analysis route, which fetches search results and analyzes content, then results show ranking status and report details.">
+        <div class="node"><strong>1. Enter a query</strong><small><code>app/page.tsx</code><br>Home component: handleSubmit</small></div>
+        <div class="node"><strong>2. Analyze</strong><small><code>app/api/analyze/route.ts</code><br>POST: SERP, page reading, content checks</small></div>
+        <div class="node"><strong>3. Save and compare</strong><small>Supabase stores signed-in audits. <code>lib/rankingMatch.ts</code> checks the submitted URL against top results.</small></div>
+        <div class="node"><strong>4. Review and export</strong><small><code>app/results/page.tsx</code> shows the report. <code>lib/downloadReport.ts</code> builds Markdown/PDF content.</small></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="route-title">
+      <h2 id="route-title">Reference route through the code</h2>
+      <p>This route is a guide to the source; it does not imply that someone has completed an interactive code tour.</p>
+      <div class="route">
+        <article class="stop"><span class="number">1</span><h3>Start where the user acts</h3><p><code>app/page.tsx</code> → Home component, <code>handleSubmit</code>. The form data is posted to <code>/api/analyze</code>; the response is kept in session storage before navigating to results.</p></article>
+        <article class="stop"><span class="number">2</span><h3>Find the matching rule</h3><p><code>lib/rankingMatch.ts</code> → <code>findSiteRankings</code>. It separates an exact URL match from other top‑10 pages on the normalized hostname, treating www/non‑www and tracking parameters as equivalent.</p></article>
+        <article class="stop"><span class="number">3</span><h3>Find the visible outcome</h3><p><code>app/results/page.tsx</code> → <code>ResultsPage</code>. It displays the exact rank and any other matching pages. The report export path starts at <code>lib/downloadReport.ts</code> → <code>buildAnalysisMarkdown</code>.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="changes-title">
+      <h2 id="changes-title">To change this, start here</h2>
+      <ul class="changes">
+        <li>Input fields and URL/text choice — <code>components/InputForm.tsx</code></li>
+        <li>Google results and result selection — <code>lib/serp.ts</code></li>
+        <li>Page-vs-domain match behavior — <code>lib/rankingMatch.ts</code></li>
+        <li>E‑E‑A‑T text indicators — <code>lib/eeat.ts</code>; report card — <code>components/report/tabs/ContentUxTab.tsx</code></li>
+        <li>Report content and PDF generation — <code>lib/downloadReport.ts</code> and <code>app/api/report/pdf/route.ts</code></li>
+        <li>Past audit list — <code>app/audits/page.tsx</code></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="practice-title">
+      <h2 id="practice-title">A practice to reuse</h2>
+      <p class="practice">Turn an ambiguous feature into observable cases before changing code. For ranking detection, “does my page rank?” became two cases—exact submitted URL and another page on the same hostname—implemented in <code>lib/rankingMatch.ts</code> and <code>app/results/page.tsx</code>. On another project, write down the positive case, the near-miss case, and what the user should see before choosing where to implement the logic.</p>
+      <p class="note">The production build passed, which checks compilation and types; it does not replace a live SERP test with a domain whose pages appear in the results.</p>
+    </section>
+
+    <section aria-labelledby="run-title">
+      <h2 id="run-title">Run it again</h2>
+      <p>From the project folder, run <code>npm run dev</code> and open <a href="http://localhost:3000">http://localhost:3000</a>. Local analysis needs the environment variable names listed in <code>.env.example</code>; put real credentials only in ignored <code>.env.local</code>, never in this map.</p>
+      <p class="note">This is an offline-readable snapshot of the current working-tree source and can drift as the app changes. The app-code changes are uncommitted in this checkout, so the map follows the working tree rather than a source commit.</p>
+    </section>
+  </main>
+</body>
+</html>
