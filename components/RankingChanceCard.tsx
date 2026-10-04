@@ -9,6 +9,8 @@ interface RankingChanceCardProps {
 }
 
 export default function RankingChanceCard({ report }: RankingChanceCardProps) {
+  const [expanded, setExpanded] = React.useState(false);
+
   if (!report) return null;
 
   const score = report.overallRankingChance;
@@ -26,6 +28,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
   };
 
   const tierStyle = getTierColor(report.tier);
+  const displayedQueries = expanded ? report.topQueries : report.topQueries.slice(0, 3);
 
   return (
     <div className="card" style={{ position: 'relative', overflow: 'hidden', margin: 0, display: 'flex', flexDirection: 'column' }}>
@@ -112,11 +115,11 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
         </div>
       </div>
 
-      {/* Top 5 Queries with Scores */}
+      {/* Top Queries with Scores */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-color)' }}>
-            Top 5 Queries with Ranking Scores:
+            Top Queries with Ranking Scores:
           </span>
           <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
             Calculated by Algorithm
@@ -124,7 +127,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {report.topQueries.map((q, idx) => {
+          {displayedQueries.map((q, idx) => {
             const qTierStyle = getTierColor(q.tier);
 
             return (
@@ -134,10 +137,10 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                   background: '#fafafc',
                   border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-md)',
-                  padding: '12px 14px',
+                  padding: '10px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px',
+                  gap: '5px',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
@@ -159,7 +162,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                     >
                       {idx + 1}
                     </span>
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-color)' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-color)' }}>
                       &ldquo;{q.query}&rdquo;
                     </span>
                     {idx === 0 && (
@@ -172,7 +175,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span
                       style={{
-                        fontSize: '1rem',
+                        fontSize: '0.95rem',
                         fontWeight: 800,
                         color: qTierStyle.text,
                       }}
@@ -186,7 +189,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                         background: qTierStyle.bg,
                         color: qTierStyle.text,
                         border: `1px solid ${qTierStyle.border}`,
-                        padding: '2px 6px',
+                        padding: '1px 6px',
                         borderRadius: '6px',
                       }}
                     >
@@ -199,7 +202,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                 <div
                   style={{
                     width: '100%',
-                    height: '5px',
+                    height: '4px',
                     background: '#e2e8f0',
                     borderRadius: '9999px',
                     overflow: 'hidden',
@@ -217,7 +220,7 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
                 </div>
 
                 {/* Actionable Insights */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: '0.76rem', color: 'var(--muted-text)', marginTop: '2px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', fontSize: '0.74rem', color: 'var(--muted-text)', marginTop: '1px' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                     <GoogleIcon name="check" size={12} color="#16a34a" />
                     <span>Advantage: <strong style={{ color: 'var(--text-color)', fontWeight: 600 }}>{q.keyAdvantage}</strong></span>
@@ -230,6 +233,33 @@ export default function RankingChanceCard({ report }: RankingChanceCardProps) {
               </div>
             );
           })}
+
+          {report.topQueries.length > 3 && (
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                width: '100%',
+                padding: '7px 12px',
+                marginTop: '4px',
+                background: 'transparent',
+                border: '1px dashed var(--border-color)',
+                borderRadius: '8px',
+                color: 'var(--accent-color)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <span>{expanded ? 'Show top 3 queries' : `Show all ${report.topQueries.length} queries`}</span>
+              <GoogleIcon name={expanded ? 'expand_less' : 'expand_more'} size={16} color="var(--accent-color)" />
+            </button>
+          )}
         </div>
       </div>
     </div>

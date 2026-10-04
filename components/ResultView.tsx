@@ -53,147 +53,196 @@ export default function ResultView({ analysis }: ResultViewProps) {
         <div
           className="card"
           style={{
-            textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
             margin: 0,
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            gap: '16px',
           }}
         >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-              <span
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <GoogleIcon name="bar_chart" size={24} color={getScoreColor(perfReport.overallScore)} />
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em', margin: 0 }}>
+                  Overall Performance Score
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>
+                  Multi-metric search performance index
+                </span>
+              </div>
+            </div>
+
+            <span
+              style={{
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                background:
+                  perfReport.grade === 'Excellent'
+                    ? 'rgba(16, 185, 129, 0.1)'
+                    : perfReport.grade === 'Good'
+                    ? 'rgba(40, 167, 156, 0.1)'
+                    : 'rgba(245, 158, 11, 0.1)',
+                color:
+                  perfReport.grade === 'Excellent'
+                    ? '#10b981'
+                    : perfReport.grade === 'Good'
+                    ? 'var(--accent-color)'
+                    : '#f59e0b',
+                border: `1px solid ${
+                  perfReport.grade === 'Excellent'
+                    ? 'rgba(16, 185, 129, 0.25)'
+                    : perfReport.grade === 'Good'
+                    ? 'rgba(40, 167, 156, 0.25)'
+                    : 'rgba(245, 158, 11, 0.25)'
+                }`,
+                padding: '3px 10px',
+                borderRadius: '9999px',
+              }}
+            >
+              {perfReport.grade}
+            </span>
+          </div>
+
+          {/* Main Score Hero */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              padding: '16px 20px',
+              background: 'linear-gradient(135deg, rgba(40, 167, 156, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
+              border: '1px solid rgba(40, 167, 156, 0.2)',
+              borderRadius: 'var(--radius-md)',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ textAlign: 'center', minWidth: '90px' }}>
+              <div
                 style={{
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--muted-text)',
+                  fontSize: '2.8rem',
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  letterSpacing: '-0.03em',
+                  color: getScoreColor(perfReport.overallScore),
                 }}
               >
-                Overall Performance Score
+                {perfReport.overallScore}%
+              </div>
+              <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, textTransform: 'uppercase' }}>
+                Aggregate Index
               </span>
-              <span
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  background:
-                    perfReport.grade === 'Excellent'
-                      ? 'rgba(16, 185, 129, 0.12)'
-                      : perfReport.grade === 'Good'
-                      ? 'rgba(40, 167, 156, 0.12)'
-                      : 'rgba(245, 158, 11, 0.12)',
-                  color:
-                    perfReport.grade === 'Excellent'
-                      ? '#10b981'
-                      : perfReport.grade === 'Good'
-                      ? 'var(--accent-color)'
-                      : '#b45309',
-                  border: `1px solid ${
-                    perfReport.grade === 'Excellent'
-                      ? 'rgba(16, 185, 129, 0.3)'
-                      : perfReport.grade === 'Good'
-                      ? 'rgba(40, 167, 156, 0.3)'
-                      : 'rgba(245, 158, 11, 0.3)'
-                  }`,
-                  padding: '2px 9px',
-                  borderRadius: '9999px',
-                }}
-              >
-                {perfReport.grade}
+            </div>
+
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-color)', lineHeight: 1.45, margin: '0 0 6px 0' }}>
+                {perfReport.summary}
+              </p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.74rem', color: 'var(--muted-text)', alignItems: 'center' }}>
+                <span>Target Intent: <strong style={{ color: 'var(--text-color)', fontWeight: 600 }}>{analysis.keywordIntent}</strong></span>
+                <span style={{ background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 500 }}>
+                  {analysis.intentCategory}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Algorithmic Pillars Breakdown Grid */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                Algorithmic Pillar Breakdown:
+              </span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
+                Weighted Factors
               </span>
             </div>
 
             <div
               style={{
-                fontSize: '4.2rem',
-                fontWeight: 800,
-                lineHeight: 1,
-                letterSpacing: '-0.04em',
-                color: getScoreColor(perfReport.overallScore),
-                margin: '10px 0 8px 0',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '10px',
               }}
             >
-              {perfReport.overallScore}%
-            </div>
-
-            <p style={{ fontSize: '0.94rem', fontWeight: 600, color: 'var(--text-color)', maxWidth: '440px', margin: '0 auto' }}>
-              {perfReport.summary}
-            </p>
-
-            <p style={{ fontSize: '0.8rem', color: 'var(--muted-text)', marginTop: '8px', lineHeight: 1.4 }}>
-              Target Intent: <span style={{ color: 'var(--text-color)', fontWeight: 500 }}>{analysis.keywordIntent}</span> ({analysis.intentCategory})
-            </p>
-          </div>
-
-          {/* Algorithmic Pillars Breakdown Grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px',
-              marginTop: '20px',
-              paddingTop: '18px',
-              borderTop: '1px solid var(--border-color)',
-            }}
-          >
-            <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                Search Intent (35%)
-              </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                  {perfReport.factors.searchIntent.score}%
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
+                  Search Intent (35%)
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                  {perfReport.factors.searchIntent.label}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                    {perfReport.factors.searchIntent.score}%
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
+                    {perfReport.factors.searchIntent.label}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
+                  <div style={{ width: `${perfReport.factors.searchIntent.score}%`, height: '100%', background: getScoreColor(perfReport.factors.searchIntent.score), borderRadius: '9999px' }} />
+                </div>
               </div>
-            </div>
 
-            <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                UI/UX Scannability (25%)
-              </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                  {perfReport.factors.scannabilityUx.score}%
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
+                  UI/UX Scannability (25%)
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                  {perfReport.factors.scannabilityUx.label}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                    {perfReport.factors.scannabilityUx.score}%
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
+                    {perfReport.factors.scannabilityUx.label}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
+                  <div style={{ width: `${perfReport.factors.scannabilityUx.score}%`, height: '100%', background: getScoreColor(perfReport.factors.scannabilityUx.score), borderRadius: '9999px' }} />
+                </div>
               </div>
-            </div>
 
-            <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                Competitive Parity (25%)
-              </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                  {perfReport.factors.competitiveParity.score}%
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
+                  Competitive Parity (25%)
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                  {perfReport.factors.competitiveParity.label}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                    {perfReport.factors.competitiveParity.score}%
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
+                    {perfReport.factors.competitiveParity.label}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
+                  <div style={{ width: `${perfReport.factors.competitiveParity.score}%`, height: '100%', background: getScoreColor(perfReport.factors.competitiveParity.score), borderRadius: '9999px' }} />
+                </div>
               </div>
-            </div>
 
-            <div style={{ background: '#fafafc', padding: '12px', borderRadius: '12px', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                Language Match (15%)
-              </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                  {perfReport.factors.languageAlignment.score}%
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
+                  Language Match (15%)
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                  {perfReport.factors.languageAlignment.label}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                    {perfReport.factors.languageAlignment.score}%
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
+                    {perfReport.factors.languageAlignment.label}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
+                  <div style={{ width: `${perfReport.factors.languageAlignment.score}%`, height: '100%', background: getScoreColor(perfReport.factors.languageAlignment.score), borderRadius: '9999px' }} />
+                </div>
               </div>
             </div>
           </div>
