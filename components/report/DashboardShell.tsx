@@ -44,6 +44,7 @@ export default function DashboardShell({ tabs, active, onChange, children }: Das
               role="tab"
               aria-selected={isActive}
               aria-controls={`dash-panel-${tab.id}`}
+              aria-label={`${tab.label}${tab.alert ? ', needs attention' : ''}${typeof tab.count === 'number' ? `, ${tab.count} items` : ''}`}
               tabIndex={isActive ? 0 : -1}
               className={`dash-tab${isActive ? ' is-active' : ''}`}
               onClick={() => onChange(tab.id)}

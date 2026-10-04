@@ -32,92 +32,28 @@ function ScannabilityCheckCard({ chk }: { chk: Check }) {
   const isWarning = chk.status === 'warning';
 
   const iconName = isAlert ? 'error' : isWarning ? 'warning' : 'check_circle';
-  const iconColor = isAlert ? COLORS.danger : isWarning ? COLORS.warning : COLORS.success;
-  const iconBg = isAlert ? '#fee2e2' : isWarning ? '#fef3c7' : '#d1fae5';
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        gap: '20px',
-        padding: '16px 20px',
-        background: 'var(--card-bg)',
-        border: '1px solid var(--border-color)',
-        borderRadius: '12px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
-        flexWrap: 'wrap',
-      }}
-    >
-      {/* Left: Standardized Icon, Title (no redundant badges), Guidance */}
-      <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', flex: 1, minWidth: '260px' }}>
-        <div
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            background: iconBg,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            marginTop: '2px',
-          }}
-        >
-          <GoogleIcon name={iconName} size={20} color={iconColor} />
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.96rem', fontWeight: 600, color: 'var(--text-color)' }}>
-              {chk.label}
-            </span>
-          </div>
-          <p style={{ fontSize: '0.86rem', lineHeight: 1.5, color: 'var(--muted-text)', margin: '6px 0 0' }}>
-            {chk.guidance || 'Matches top ranking competitor scannability standards.'}
-          </p>
+    <div className={`scannability-check-card scannability-check-card--${chk.status}`}>
+      <div className="scannability-check-main">
+        <span className="scannability-check-icon">
+          <GoogleIcon name={iconName} size={20} color="currentColor" />
+        </span>
+        <div className="scannability-check-copy">
+          <strong>{chk.label}</strong>
+          <p>{chk.guidance || 'Matches top ranking competitor scannability standards.'}</p>
         </div>
       </div>
 
-      {/* Right: Refined Metrics Comparison Box */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '18px',
-          padding: '12px 18px',
-          background: 'var(--segmented-bg)',
-          borderRadius: '10px',
-          border: '1px solid rgba(0, 0, 0, 0.09)',
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', minWidth: '85px' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: '3px' }}>
-            Your Draft
-          </div>
-          <div
-            style={{
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              color: isAlert ? COLORS.danger : isWarning ? COLORS.warning : 'var(--text-color)',
-              lineHeight: 1.25,
-            }}
-          >
-            {chk.userValue}
-          </div>
+      <div className="scannability-check-comparison" aria-label="Draft compared with top 10 benchmark">
+        <div className="scannability-check-metric scannability-check-metric--draft">
+          <span>Your draft</span>
+          <strong>{chk.userValue}</strong>
         </div>
-
-        <div style={{ width: '1px', height: '32px', background: 'rgba(0, 0, 0, 0.16)', flexShrink: 0 }} />
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', minWidth: '110px' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: '3px' }}>
-            Top 10 Benchmark
-          </div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-color)', opacity: 0.85, lineHeight: 1.25 }}>
-            {formatBenchmark(chk.competitorBenchmark)}
-          </div>
+        <span className="scannability-check-divider" aria-hidden="true" />
+        <div className="scannability-check-metric">
+          <span>Top 10 benchmark</span>
+          <strong>{formatBenchmark(chk.competitorBenchmark)}</strong>
         </div>
       </div>
     </div>
@@ -176,7 +112,7 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
 
   return (
     <div className="bento">
-      <SectionCard title="Scannability Score" subtitle="Structure of your draft vs. top results" span={12}>
+      <SectionCard title="Content Quality Score" subtitle="Structure of your draft vs. top results" span={12}>
         <div className="scannability-score-layout">
           <RingGauge value={audit.scannabilityScore} size={170} stroke={13} caption="Score" />
           <div className="scannability-score-status">
@@ -192,6 +128,36 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
           </div>
         </div>
       </SectionCard>
+
+      {analysis.eeatAudit && (
+        <SectionCard
+          title="E-E-A-T Signals Review"
+          subtitle={`${analysis.eeatAudit.detectedSignals} of ${analysis.eeatAudit.totalSignals} observable signals found in the submitted text`}
+          span={12}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+            {analysis.eeatAudit.dimensions.map((dimension) => (
+              <section key={dimension.key} style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '12px', background: 'var(--segmented-bg)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                  <h4 style={{ margin: 0, color: 'var(--text-color)', fontSize: '0.96rem' }}>{dimension.label}</h4>
+                  <span style={{ color: 'var(--muted-text)', fontSize: '0.82rem', fontWeight: 700 }}>{dimension.detected}/{dimension.total}</span>
+                </div>
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '10px' }}>
+                  {dimension.signals.map((signal) => (
+                    <li key={signal.label} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: 'var(--muted-text)', fontSize: '0.82rem', lineHeight: 1.45 }}>
+                      <GoogleIcon name={signal.detected ? 'check_circle' : 'help'} size={16} color={signal.detected ? COLORS.success : 'var(--muted-text)'} style={{ flex: '0 0 auto', marginTop: 1 }} />
+                      <span>{signal.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+          <p style={{ margin: '16px 0 0', color: 'var(--muted-text)', fontSize: '0.78rem', lineHeight: 1.5 }}>
+            {analysis.eeatAudit.scopeNotice}
+          </p>
+        </SectionCard>
+      )}
 
       <SectionCard title="You vs. Top 10 Average" subtitle="Compare your page with the average across the ranking results" span={12}>
         <CompareTable

@@ -6,6 +6,7 @@ import { DeterministicAuditSummary } from './scannability';
 import { RankingChanceReport } from './rankingChance';
 import { LanguageAuditResult } from './language';
 import { OverallPerformanceReport } from './performanceScore';
+import { EeatAuditResult } from './eeat';
 
 export interface CompetitorIntentInfo {
   rank: number;
@@ -42,6 +43,7 @@ export interface AnalysisResult {
   competitorIntents: CompetitorIntentInfo[];
   competitorsAnalyzedCount: number;
   scannabilityAudit?: DeterministicAuditSummary;
+  eeatAudit?: EeatAuditResult;
   aiOverview?: GoogleAiOverviewData;
   relatedSearches?: RelatedSearchItem[];
   peopleAlsoAsk?: PeopleAlsoAskItem[];

@@ -174,7 +174,7 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
                   color: 'var(--accent-color)',
                 }}
               >
-                <GoogleIcon name="track_changes" size={14} color="var(--accent-color)" />
+                <GoogleIcon name="fact_check" size={14} color="var(--accent-color)" />
                 <span>Highest Ranking Format</span>
               </div>
             </div>

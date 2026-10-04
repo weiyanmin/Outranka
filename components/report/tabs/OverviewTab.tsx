@@ -123,7 +123,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
           {ai && (
             <StatTile
               label="AI Overview"
-              value={ai.triggered ? 'Shown' : 'Not shown'}
+              value={ai.triggered ? 'Shown' : 'Not Triggered'}
               sub={ai.triggered ? `${ai.references.length} sources cited` : 'Organic results only'}
             />
           )}

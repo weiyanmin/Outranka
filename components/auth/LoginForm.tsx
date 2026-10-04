@@ -112,8 +112,7 @@ export default function LoginForm() {
   return (
     <section className="login-form-wrap" aria-labelledby="login-title">
       <div className="login-brand-row">
-        <a className="login-brand" href="/login" aria-label="Outranka login"><BrandMark size={32} /><span>Outranka</span></a>
-        <span className="login-live-pill"><span /> Live Google SERP Active</span>
+        <a className="login-brand login-brand-primary" href="/login" aria-label="Outranka login"><BrandMark size={42} /><span>Outranka</span></a>
       </div>
 
       <div className="login-heading">

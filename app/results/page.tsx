@@ -9,13 +9,22 @@ import AccountControl from '../../components/auth/AccountControl';
 import { AnalysisResult } from '../../lib/analyze';
 import { SerpResultItem } from '../../lib/serp';
 import { downloadAnalysisMarkdown, downloadAnalysisPdf } from '../../lib/downloadReport';
+import { findSiteRankings } from '../../lib/rankingMatch';
 
 export default function ResultsPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [competitors, setCompetitors] = useState<SerpResultItem[]>([]);
-  const [query, setQuery] = useState<{ keyword: string; location: string; inputType: string } | null>(null);
+  const [query, setQuery] = useState<{
+    keyword: string;
+    location: string;
+    inputType: string;
+    sourceUrl?: string;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false);
+  const [pdfDownloadError, setPdfDownloadError] = useState('');
+  const [persistenceWarning, setPersistenceWarning] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,6 +32,7 @@ export default function ResultsPage() {
       const storedAnalysis = sessionStorage.getItem('outranka_analysis');
       const storedCompetitors = sessionStorage.getItem('outranka_competitors');
       const storedQuery = sessionStorage.getItem('outranka_query');
+      const storedSaveWarning = sessionStorage.getItem('outranka_audit_save_warning');
 
       if (storedAnalysis) {
         setAnalysis(JSON.parse(storedAnalysis));
@@ -33,6 +43,7 @@ export default function ResultsPage() {
       if (storedQuery) {
         setQuery(JSON.parse(storedQuery));
       }
+      if (storedSaveWarning) setPersistenceWarning(storedSaveWarning);
     } catch (e) {
       console.error('Failed to load analysis from session storage:', e);
     } finally {
@@ -71,11 +82,39 @@ export default function ResultsPage() {
     downloadAnalysisMarkdown(query, analysis, competitors);
   };
 
-  const handleDownloadPdf = () => {
-    if (!analysis || !query) return;
+  const handleDownloadPdf = async () => {
+    if (!analysis || !query || isPdfGenerating) return;
     setIsDownloadOpen(false);
-    downloadAnalysisPdf(query, analysis, competitors);
+    setPdfDownloadError('');
+    setIsPdfGenerating(true);
+    try {
+      await downloadAnalysisPdf(query, analysis, competitors);
+    } catch (error) {
+      console.error('Failed to generate the PDF report.', error);
+      setPdfDownloadError('Could not generate the PDF. Please try again.');
+    } finally {
+      setIsPdfGenerating(false);
+    }
   };
+
+  let sourcePageUrl = '';
+  if (query?.sourceUrl) {
+    try {
+      const parsedUrl = new URL(query.sourceUrl);
+      if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+        sourcePageUrl = parsedUrl.href;
+      }
+    } catch {
+      // Ignore malformed URLs from stale or manually edited session data.
+    }
+  }
+  const isUrlAudit = query?.inputType === 'url' && Boolean(sourcePageUrl);
+  const siteRankings = isUrlAudit && sourcePageUrl
+    ? findSiteRankings(sourcePageUrl, competitors)
+    : null;
+  const hasDomainRanking = Boolean(
+    siteRankings && (siteRankings.exactPosition !== null || siteRankings.otherPages.length > 0)
+  );
 
   if (isLoading) {
     return (
@@ -112,7 +151,7 @@ export default function ResultsPage() {
             fontSize: '0.95rem',
           }}
         >
-          <GoogleIcon name="arrow_back" size={16} color="#ffffff" />
+          <GoogleIcon name="fact_check" size={16} color="#ffffff" />
           <span>Start New Audit</span>
         </Link>
       </div>
@@ -144,8 +183,12 @@ export default function ResultsPage() {
 
           <div className="results-nav-actions">
             <AccountControl />
+            <Link href="/audits" className="results-nav-btn results-nav-btn-secondary" title="Browse past audits">
+              <GoogleIcon name="description" size={15} color="currentColor" />
+              <span>Past Audits</span>
+            </Link>
             <Link href="/" className="results-nav-btn results-nav-btn-secondary" title="Start a new search intent audit">
-              <GoogleIcon name="arrow_back" size={15} color="currentColor" />
+              <GoogleIcon name="fact_check" size={15} color="currentColor" />
               <span>New Audit</span>
             </Link>
 
@@ -153,11 +196,13 @@ export default function ResultsPage() {
               <button
                 onClick={() => setIsDownloadOpen((prev) => !prev)}
                 className={`results-nav-btn results-nav-btn-primary ${isDownloadOpen ? 'active' : ''}`}
+                disabled={isPdfGenerating}
                 aria-expanded={isDownloadOpen}
                 aria-haspopup="true"
+                aria-busy={isPdfGenerating}
               >
-                <GoogleIcon name="download" size={15} color="currentColor" />
-                <span>Download Report</span>
+                <GoogleIcon name={isPdfGenerating ? 'progress_activity' : 'download'} size={15} color="currentColor" className={isPdfGenerating ? 'icon-spin' : ''} />
+                <span>{isPdfGenerating ? 'Preparing PDF…' : 'Download Report'}</span>
                 <GoogleIcon
                   name="expand_more"
                   size={13}
@@ -199,7 +244,7 @@ export default function ResultsPage() {
                     </div>
                   </button>
 
-                  <button
+                    <button
                     onClick={handleDownloadPdf}
                     className="results-nav-dropdown-item"
                   >
@@ -222,7 +267,7 @@ export default function ResultsPage() {
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>Download as PDF</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>Formatted print & save</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>Downloads automatically</span>
                     </div>
                   </button>
                 </div>
@@ -233,6 +278,8 @@ export default function ResultsPage() {
       </header>
 
       <div className="results-container">
+        {persistenceWarning && <p className="audit-persist-warning" role="status">{persistenceWarning}</p>}
+        {pdfDownloadError && <p className="audit-persist-warning" role="alert">{pdfDownloadError}</p>}
         {/* Audit Meta Header */}
         <div style={{ marginBottom: '22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -258,6 +305,52 @@ export default function ResultsPage() {
           <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', marginTop: '4px' }}>
             Audit completed against top 10 competitors ranking in Google
           </p>
+          {sourcePageUrl && (
+            <a
+              className="results-source-url"
+              href={sourcePageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={sourcePageUrl}
+              aria-label={`Open audited source page: ${sourcePageUrl}`}
+            >
+              <GoogleIcon name="language" size={14} color="currentColor" />
+              <span>{sourcePageUrl}</span>
+              <GoogleIcon name="open_in_new" size={12} color="currentColor" />
+            </a>
+          )}
+          {isUrlAudit && (
+            <p
+              role="status"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '7px',
+                width: 'fit-content',
+                margin: '10px 0 0',
+                padding: '7px 11px',
+                borderRadius: '9px',
+                background: hasDomainRanking ? 'var(--accent-light)' : 'var(--segmented-bg)',
+                color: hasDomainRanking ? 'var(--accent-strong)' : 'var(--muted-text)',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+              }}
+            >
+              <GoogleIcon name={hasDomainRanking ? 'check_circle' : 'fact_check'} size={15} color="currentColor" />
+              <span>
+                {siteRankings?.exactPosition !== null
+                  ? `Your exact page ranks #${siteRankings.exactPosition} in the top 10.`
+                  : siteRankings?.otherPages.length
+                    ? `Your exact URL was not found, but ${siteRankings.otherPages.length} other page${siteRankings.otherPages.length === 1 ? '' : 's'} from this domain rank in the top 10.`
+                    : 'No page from this domain was detected in this audit’s top 10 organic results.'}
+                {siteRankings?.otherPages.map((page) => (
+                  <span key={`${page.position}-${page.link}`} style={{ display: 'block', marginTop: '5px', fontWeight: 500 }}>
+                    #{page.position} · <a href={page.link} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>{page.title || page.link}</a>
+                  </span>
+                ))}
+              </span>
+            </p>
+          )}
         </div>
 
       {/* Tabbed dashboard (competitors live in their own tab) */}

@@ -1,655 +1,228 @@
 import { AnalysisResult } from './analyze';
 import { SerpResultItem } from './serp';
 import { getSchemaOrgUrl } from './schema';
+import { findSiteRankings } from './rankingMatch';
 
-export function downloadAnalysisMarkdown(
-  query: { keyword: string; location: string; inputType: string },
-  analysis: AnalysisResult,
-  competitors: SerpResultItem[]
-) {
-  const md = `# Outranka SEO Analysis Report
-
-**Target Keyword:** ${query.keyword}  
-**Location:** ${query.location}  
-**Search Intent Type:** ${analysis.intentCategory} Intent  
-**Target Query Intent:** ${analysis.keywordIntent}  
-${analysis.overallPerformance ? `**Overall Performance Score:** ${analysis.overallPerformance.overallScore}% (${analysis.overallPerformance.grade})
-- **Summary:** ${analysis.overallPerformance.summary}
-- **Search Intent Match (35%):** ${analysis.overallPerformance.factors.searchIntent.score}% (${analysis.overallPerformance.factors.searchIntent.label})
-- **UI/UX & Scannability (25%):** ${analysis.overallPerformance.factors.scannabilityUx.score}% (${analysis.overallPerformance.factors.scannabilityUx.label})
-- **Competitive Parity (25%):** ${analysis.overallPerformance.factors.competitiveParity.score}% (${analysis.overallPerformance.factors.competitiveParity.label})
-- **SERP Language Match (15%):** ${analysis.overallPerformance.factors.languageAlignment.score}% (${analysis.overallPerformance.factors.languageAlignment.label})
-` : `**Overall Performance Score:** ${analysis.score}%  
-`}
-${analysis.rankingChanceReport ? `**Your Chance of Ranking in Google:** ${analysis.rankingChanceReport.overallRankingChance}% (${analysis.rankingChanceReport.tier})  
-` : ''}
----
-
-${analysis.rankingChanceReport ? `## Your Chance of Ranking in Google
-- **Overall Ranking Probability:** ${analysis.rankingChanceReport.overallRankingChance}% (${analysis.rankingChanceReport.tier})
-- **Algorithmic Verdict:** ${analysis.rankingChanceReport.verdict}
-
-### Top 5 Queries Ranking Probability Breakdown:
-${analysis.rankingChanceReport.topQueries.map((q, i) => `${i + 1}. **"${q.query}"**: **${q.chanceScore}%** [${q.tier}]
-   - Key Advantage: ${q.keyAdvantage}
-   - Action to Rank Higher: ${q.actionToRankHigher}`).join('\n')}
-
----
-` : ''}
-${analysis.intentMismatch ? `\n> ⚠️ **Search Intent Mismatch Warning**\n> ${analysis.intentMismatchReason}\n> - User format: ${analysis.userPageType}\n> - Google prefers: ${analysis.topPagesType}\n` : ''}
-${analysis.languageAudit ? `
----
-
-## SERP Language Alignment & Detection
-- **Your Content Language:** ${analysis.languageAudit.userLanguage.name} (${analysis.languageAudit.userLanguage.code.toUpperCase()})
-- **Google Favored SERP Language:** ${analysis.languageAudit.favoredSerpLanguage.name} (${analysis.languageAudit.favoredSerpLanguage.confidence}% of Top 10)
-- **Language Status:** ${analysis.languageAudit.isMismatch ? `⚠️ MISMATCH DETECTED (${analysis.languageAudit.mismatchSeverity.toUpperCase()})` : '✓ MATCH'}
-${analysis.languageAudit.isMismatch && analysis.languageAudit.warningMessage ? `> ⚠️ **Warning:** ${analysis.languageAudit.warningMessage}\n> **Recommendation:** ${analysis.languageAudit.recommendation}\n` : ''}
-` : ''}
----
-
-## Top 3 Missing Topics
-${analysis.missingTopics.map((topic, i) => `${i + 1}. ${topic}`).join('\n')}
-
----
-
-## Priority Recommendations
-${analysis.topRecommendations.map((rec) => `- ${rec}`).join('\n')}
-
----
-
-## Suggested Content Structure
-${analysis.suggestedStructure.map((s) => `### [${s.level || 'H2'}] ${s.heading}\n${s.description}\n`).join('\n')}
-
----
-
-## Recommended Schema Types
-${analysis.suggestedSchema.map((sch) => `- **[${sch.type}](${getSchemaOrgUrl(sch.type)})**: ${sch.reason}`).join('\n')}
-
----
-
-## What Your Content Does Well
-${analysis.strengths.map((str) => `- ${str}`).join('\n')}
-
-${analysis.scannabilityAudit ? `
----
-
-## UI, UX & Scannability Deterministic Audit
-- **H1 Tags:** ${analysis.scannabilityAudit.userMetrics.h1Count}
-- **H2 Sections:** ${analysis.scannabilityAudit.userMetrics.h2Count} (Competitor Top 10 Avg: ${analysis.scannabilityAudit.topCompetitorAverages.avgH2Count})
-- **Images:** ${analysis.scannabilityAudit.userMetrics.imageCount} (Competitor Top 10 Avg: ${analysis.scannabilityAudit.topCompetitorAverages.avgImageCount})
-- **Videos:** ${analysis.scannabilityAudit.userMetrics.videoCount} (Competitor Top 10 Avg: ${analysis.scannabilityAudit.topCompetitorAverages.avgVideoCount})
-- **Table of Contents:** ${analysis.scannabilityAudit.userMetrics.hasTableOfContents ? 'Present' : 'Not Detected'} (${analysis.scannabilityAudit.topCompetitorAverages.tocAdoptionRate}% of competitors use TOC)
-
-### Specific Scannability Rules:
-${analysis.scannabilityAudit.checks.map(c => `- [${c.status.toUpperCase()}] **${c.label}**: ${c.userValue} (Benchmark: ${c.competitorBenchmark}) — ${c.guidance}`).join('\n')}
-${analysis.aiOverview ? `
----
-
-## Google AI Overview (AI Mode)
-- **Status:** ${analysis.aiOverview.triggered ? 'Triggered (AI Overview generated for this query)' : 'Not Triggered'}
-${analysis.aiOverview.triggered && analysis.aiOverview.snippet ? `- **AI Summary Excerpt:** "${analysis.aiOverview.snippet}"\n` : ''}
-${analysis.aiOverview.triggered && analysis.aiOverview.references.length > 0 ? `### Pages Cited by Google AI:
-${analysis.aiOverview.references.map((r, i) => `${i + 1}. [${r.domain || r.source}] ${r.title} — ${r.link}${r.matchesCompetitorRank ? ` (Matches Organic Competitor #${r.matchesCompetitorRank})` : ''}`).join('\n')}
-` : ''}
-` : ''}
-` : ''}
-
-${analysis.relatedSearches && analysis.relatedSearches.length > 0 ? `
----
-
-## Google Suggested Related Searches
-${analysis.relatedSearches.map((item) => `- ${item.query}`).join('\n')}
-` : ''}
-
-${analysis.peopleAlsoAsk && analysis.peopleAlsoAsk.length > 0 ? `
----
-
-## Google "People Also Ask" Questions
-${analysis.peopleAlsoAsk.map((q) => `### ${q.question}\n${q.snippet ? `${q.snippet}\n` : ''}${q.link ? `Source: ${q.link}\n` : ''}`).join('\n')}
-` : ''}
-
----
-
-## Top 10 Google Competitors Analyzed
-${competitors.map((c) => {
-  const intentInfo = analysis.competitorIntents?.find((ci) => ci.rank === c.position || ci.url === c.link);
-  const intentLabel = intentInfo ? ` [${intentInfo.intentCategory} Intent]` : '';
-  const schemaList = c.schemaTypes && c.schemaTypes.length > 0 ? c.schemaTypes.join(', ') : 'None detected';
-  const assetInfo = c.metrics ? `\n- Assets: ${c.metrics.h1Count} H1, ${c.metrics.h2Count} H2 | ${c.metrics.imageCount} imgs | ${c.metrics.videoCount} vids | TOC: ${c.metrics.hasTableOfContents ? 'Yes' : 'No'}` : '';
-  return `### #${c.position}. ${c.title}${intentLabel}\n- URL: ${c.link}\n- Schema Types: ${schemaList}${assetInfo}\n- Snippet: ${c.snippet}\n`;
-}).join('\n')}
-
-*Generated by Outranka — AI Search Intent & Competitor Content Auditor.*
-`;
-
-  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const sanitizedKeyword = query.keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30);
-  a.download = `outranka-report-${sanitizedKeyword}.md`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+export interface ReportQuery {
+  keyword: string;
+  location: string;
+  inputType: string;
+  sourceUrl?: string;
 }
 
-export function downloadAnalysisPdf(
-  query: { keyword: string; location: string; inputType: string },
+export function buildAnalysisMarkdown(
+  query: ReportQuery,
   analysis: AnalysisResult,
-  competitors: SerpResultItem[]
+  competitors: SerpResultItem[],
 ) {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Please allow popups to generate the PDF report.');
-    return;
+  const overall = analysis.overallPerformance;
+  const ranking = analysis.rankingChanceReport;
+  const scannability = analysis.scannabilityAudit;
+  const language = analysis.languageAudit;
+  const siteRankings = query.inputType === 'url' && query.sourceUrl
+    ? findSiteRankings(query.sourceUrl, competitors)
+    : null;
+
+  return [
+    '# Outranka SEO Analysis Report',
+    '',
+    `**Target keyword:** ${query.keyword}  `,
+    `**Search region:** ${query.location}  `,
+    `**Search intent:** ${analysis.intentCategory}  `,
+    `**Target query intent:** ${analysis.keywordIntent}  `,
+    ...(query.inputType === 'url' && query.sourceUrl ? [
+      `**Submitted page:** ${query.sourceUrl}  `,
+      `**Exact-page status:** ${siteRankings?.exactPosition !== null
+        ? `Ranking #${siteRankings?.exactPosition}`
+        : 'Not detected in the top 10 results'}`,
+      `**Other pages from this domain in top 10:** ${siteRankings?.otherPages.length || 0}`,
+      ...(siteRankings?.otherPages.map((page) => `- #${page.position} [${page.title || page.link}](${page.link})`) || []),
+    ] : []),
+    `**Overall performance:** ${overall ? `${overall.overallScore}% (${overall.grade})` : `${analysis.score}%`}`,
+    ...(overall ? [
+      '',
+      overall.summary,
+      '',
+      '| Performance pillar | Score | Assessment |',
+      '| --- | ---: | --- |',
+      `| Search intent | ${overall.factors.searchIntent.score}% | ${overall.factors.searchIntent.label} |`,
+      `| Content quality & scannability | ${overall.factors.scannabilityUx.score}% | ${overall.factors.scannabilityUx.label} |`,
+      `| Competitive parity | ${overall.factors.competitiveParity.score}% | ${overall.factors.competitiveParity.label} |`,
+      `| SERP language match | ${overall.factors.languageAlignment.score}% | ${overall.factors.languageAlignment.label} |`,
+    ] : []),
+    ...(ranking ? [
+      '',
+      '## Ranking opportunity',
+      '',
+      `**Chance of ranking:** ${ranking.overallRankingChance}% (${ranking.tier})`,
+      '',
+      ranking.verdict,
+      '',
+      ...ranking.topQueries.map((item, index) => `${index + 1}. **${item.query}** — ${item.chanceScore}% (${item.tier})\n   - Advantage: ${item.keyAdvantage}\n   - Next step: ${item.actionToRankHigher}`),
+    ] : []),
+    ...(analysis.intentMismatch ? [
+      '',
+      '## Search intent mismatch',
+      '',
+      analysis.intentMismatchReason,
+      `- Your page type: ${analysis.userPageType}`,
+      `- Google favors: ${analysis.topPagesType}`,
+    ] : []),
+    ...(language ? [
+      '',
+      '## SERP language alignment',
+      '',
+      `- Your content: ${language.userLanguage.name} (${language.userLanguage.code.toUpperCase()})`,
+      `- Favored SERP language: ${language.favoredSerpLanguage.name} (${language.favoredSerpLanguage.confidence}% of top results)`,
+      `- Status: ${language.isMismatch ? `Mismatch — ${language.mismatchSeverity}` : 'Aligned'}`,
+      ...(language.warningMessage ? [`- Recommendation: ${language.recommendation}`] : []),
+    ] : []),
+    '',
+    '## Topics to cover',
+    '',
+    ...analysis.missingTopics.map((topic, index) => `${index + 1}. ${topic}`),
+    '',
+    '## Priority recommendations',
+    '',
+    ...analysis.topRecommendations.map((recommendation) => `- ${recommendation}`),
+    '',
+    '## Suggested content structure',
+    '',
+    ...analysis.suggestedStructure.flatMap((section) => [
+      `### ${section.level || 'H2'} — ${section.heading}`,
+      '',
+      section.description,
+      '',
+    ]),
+    '## Recommended schema types',
+    '',
+    ...analysis.suggestedSchema.map((schema) => `- **${schema.type}** ([Schema.org](${getSchemaOrgUrl(schema.type)})): ${schema.reason}`),
+    '',
+    '## What your content does well',
+    '',
+    ...analysis.strengths.map((strength) => `- ${strength}`),
+    ...(analysis.eeatAudit ? [
+      '',
+      '## E-E-A-T signals review',
+      '',
+      'This heuristic reviews observable clues in the submitted text. It is not Google’s ranking algorithm and does not verify authors, sources, factual accuracy, or site reputation.',
+      '',
+      ...analysis.eeatAudit.dimensions.flatMap((dimension) => [
+        `### ${dimension.label} (${dimension.detected}/${dimension.total} signals detected)`,
+        ...dimension.signals.map((signal) => `- [${signal.detected ? 'x' : ' '}] ${signal.label}`),
+        '',
+      ]),
+    ] : []),
+    ...(scannability ? [
+      '',
+      '## Content quality and scannability audit',
+      '',
+      '| Measure | Your draft | Top-result average |',
+      '| --- | ---: | ---: |',
+      `| H1 headings | ${scannability.userMetrics.h1Count} | — |`,
+      `| H2 sections | ${scannability.userMetrics.h2Count} | ${scannability.topCompetitorAverages.avgH2Count} |`,
+      `| H3 sections | ${scannability.userMetrics.h3Count} | ${scannability.topCompetitorAverages.avgH3Count} |`,
+      `| Images | ${scannability.userMetrics.imageCount} | ${scannability.topCompetitorAverages.avgImageCount} |`,
+      `| Videos | ${scannability.userMetrics.videoCount} | ${scannability.topCompetitorAverages.avgVideoCount} |`,
+      `| Word count | ${scannability.userMetrics.wordCount} | ${scannability.topCompetitorAverages.avgWordCount} |`,
+      `| Table of contents | ${scannability.userMetrics.hasTableOfContents ? 'Present' : 'Not detected'} | ${scannability.topCompetitorAverages.tocAdoptionRate}% adoption |`,
+      '',
+      ...scannability.checks.map((check) => `- **${check.status.toUpperCase()} — ${check.label}:** ${check.userValue} (benchmark: ${check.competitorBenchmark}). ${check.guidance}`),
+    ] : []),
+    ...(analysis.aiOverview ? [
+      '',
+      '## Google AI Overview',
+      '',
+      `**Status:** ${analysis.aiOverview.triggered ? 'Triggered' : 'Not triggered'}`,
+      ...(analysis.aiOverview.snippet ? ['', analysis.aiOverview.snippet] : []),
+      ...(analysis.aiOverview.references.length ? [
+        '',
+        '### Cited sources',
+        '',
+        ...analysis.aiOverview.references.map((reference, index) => `${index + 1}. [${reference.title || reference.domain || reference.source}](${reference.link})${reference.matchesCompetitorRank ? ` — organic result #${reference.matchesCompetitorRank}` : ''}`),
+      ] : []),
+    ] : []),
+    ...(analysis.relatedSearches?.length ? ['', '## Related searches', '', ...analysis.relatedSearches.map((item) => `- ${item.query}`)] : []),
+    ...(analysis.peopleAlsoAsk?.length ? [
+      '',
+      '## People also ask',
+      '',
+      ...analysis.peopleAlsoAsk.flatMap((item) => [
+        `### ${item.question}`,
+        '',
+        item.snippet || '',
+        ...(item.link ? ['', `Source: ${item.link}`] : []),
+        '',
+      ]),
+    ] : []),
+    '',
+    '## Google organic competitors',
+    '',
+    ...competitors.flatMap((competitor) => {
+      const intent = analysis.competitorIntents?.find((item) => item.rank === competitor.position || item.url === competitor.link);
+      const metrics = competitor.metrics;
+      return [
+        `### ${competitor.position}. ${competitor.title}`,
+        '',
+        `- URL: ${competitor.link}`,
+        `- Intent: ${intent?.intentCategory || 'General'}`,
+        `- Schema types: ${competitor.schemaTypes?.length ? competitor.schemaTypes.join(', ') : 'None detected'}`,
+        ...(metrics ? [
+          `- Page structure: ${metrics.h1Count} H1, ${metrics.h2Count} H2, ${metrics.imageCount} images, ${metrics.videoCount} videos, ${metrics.wordCount} words`,
+          `- Table of contents: ${metrics.hasTableOfContents ? 'Yes' : 'No'}`,
+        ] : []),
+        '',
+        `> ${competitor.snippet || 'No search snippet available.'}`,
+        '',
+      ];
+    }),
+    '---',
+    '',
+    '*Generated by Outranka — AI Search Intent & Competitor Content Auditor.*',
+  ].join('\n');
+}
+
+function getReportFilename(keyword: string, extension: 'md' | 'pdf') {
+  const safeKeyword = keyword
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40) || 'audit';
+  return `outranka-report-${safeKeyword}.${extension}`;
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export function downloadAnalysisMarkdown(query: ReportQuery, analysis: AnalysisResult, competitors: SerpResultItem[]) {
+  const markdown = buildAnalysisMarkdown(query, analysis, competitors);
+  downloadBlob(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }), getReportFilename(query.keyword, 'md'));
+}
+
+export async function downloadAnalysisPdf(query: ReportQuery, analysis: AnalysisResult, competitors: SerpResultItem[]) {
+  const response = await fetch('/api/report/pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      markdown: buildAnalysisMarkdown(query, analysis, competitors),
+      filename: getReportFilename(query.keyword, 'pdf'),
+    }),
+  });
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null);
+    throw new Error(result?.error || 'The PDF report could not be generated.');
   }
 
-  const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Outranka Report - ${query.keyword}</title>
-  <style>
-    @page {
-      size: A4;
-      margin: 14mm 16mm;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: #1d1d1f;
-      background: #ffffff;
-      line-height: 1.45;
-      padding: 10px;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      border-bottom: 2px solid #28a79c;
-      padding-bottom: 16px;
-      margin-bottom: 20px;
-    }
-    .brand {
-      font-size: 24px;
-      font-weight: 800;
-      color: #1d1d1f;
-      letter-spacing: -0.02em;
-    }
-    .tagline {
-      font-size: 11px;
-      color: #86868b;
-      margin-top: 2px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .meta-date {
-      font-size: 11px;
-      color: #86868b;
-      text-align: right;
-    }
-    .query-box {
-      background: #fbfbfc;
-      border: 1px solid #e5e5ea;
-      border-radius: 8px;
-      padding: 14px 18px;
-      margin-bottom: 20px;
-    }
-    .query-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1d1d1f;
-    }
-    .badges {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-      align-items: center;
-    }
-    .badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: #eef8f7;
-      color: #28a79c;
-      border: 1px solid rgba(40, 167, 156, 0.3);
-    }
-    .score-card {
-      background: #ffffff;
-      border: 1px solid #e5e5ea;
-      border-radius: 10px;
-      padding: 18px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .score-num {
-      font-size: 46px;
-      font-weight: 800;
-      color: #28a79c;
-      line-height: 1;
-      margin: 8px 0;
-    }
-    .factors-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid #f0f0f2;
-      text-align: left;
-    }
-    .factor-item {
-      background: #fbfbfc;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #f0f0f2;
-    }
-    .factor-title {
-      font-size: 10px;
-      color: #86868b;
-      display: block;
-    }
-    .factor-val {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1d1d1f;
-    }
-    .section {
-      margin-bottom: 20px;
-      page-break-inside: avoid;
-    }
-    .section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1d1d1f;
-      margin-bottom: 8px;
-      border-bottom: 1px solid #f0f0f2;
-      padding-bottom: 4px;
-    }
-    .topic-list, .rec-list {
-      list-style: none;
-    }
-    .topic-item {
-      display: flex;
-      gap: 10px;
-      padding: 8px 10px;
-      background: #fbfbfc;
-      border: 1px solid #e5e5ea;
-      border-radius: 6px;
-      margin-bottom: 6px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .topic-num {
-      background: #28a79c;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .rec-item {
-      font-size: 12px;
-      margin-bottom: 6px;
-      padding-left: 12px;
-      position: relative;
-    }
-    .rec-item::before {
-      content: "•";
-      color: #28a79c;
-      font-weight: bold;
-      position: absolute;
-      left: 0;
-    }
-    .structure-item {
-      padding: 8px 10px;
-      background: #fbfbfc;
-      border: 1px solid #e5e5ea;
-      border-radius: 6px;
-      margin-bottom: 6px;
-      font-size: 11px;
-    }
-    .structure-head {
-      font-weight: 700;
-      color: #28a79c;
-    }
-    .competitor-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      margin-top: 8px;
-    }
-    .competitor-table th {
-      background: #fbfbfc;
-      text-align: left;
-      padding: 6px 8px;
-      border: 1px solid #e5e5ea;
-      font-weight: 600;
-      color: #86868b;
-    }
-    .competitor-table td {
-      padding: 6px 8px;
-      border: 1px solid #e5e5ea;
-      vertical-align: top;
-    }
-    .mismatch-alert {
-      background: #fffbf0;
-      border: 1px solid #fde68a;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 11px;
-      color: #92400e;
-      margin-bottom: 16px;
-    }
-    @media print {
-      body {
-        padding: 0;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="brand">Outranka</div>
-      <div class="tagline">Search Intent & Competitor SEO Auditor</div>
-    </div>
-    <div class="meta-date">
-      <div>Generated: ${new Date().toLocaleDateString()}</div>
-      <div>Powered by Google Gemini 3.8 Flash</div>
-    </div>
-  </div>
-
-  <div class="query-box">
-    <div class="query-title">Target: "${query.keyword}"</div>
-    <div class="badges">
-      <span class="badge">${query.location.toUpperCase()} REGION</span>
-      <span class="badge">${analysis.intentCategory} INTENT</span>
-    </div>
-    <div style="font-size: 12px; color: #86868b; margin-top: 6px;">
-      Query Goal: ${analysis.keywordIntent}
-    </div>
-  </div>
-
-  <div class="score-card">
-    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #86868b;">
-      Overall Performance Score
-    </div>
-    <div class="score-num">${analysis.overallPerformance ? analysis.overallPerformance.overallScore : analysis.score}%</div>
-    <div style="font-size: 12px; font-weight: 600;">
-      ${analysis.overallPerformance ? analysis.overallPerformance.summary : (analysis.score >= 80 ? 'High Intent Parity with Market Leaders' : 'Topic Gaps Detected Against Competitors')}
-    </div>
-    <div class="factors-grid">
-      <div class="factor-item">
-        <span class="factor-title">Search Intent (35%)</span>
-        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.searchIntent.score : analysis.factorScores.queryRelevance}%</span>
-      </div>
-      <div class="factor-item">
-        <span class="factor-title">UI/UX Scannability (25%)</span>
-        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.scannabilityUx.score : analysis.factorScores.structure}%</span>
-      </div>
-      <div class="factor-item">
-        <span class="factor-title">Competitive Parity (25%)</span>
-        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.competitiveParity.score : analysis.factorScores.readability}%</span>
-      </div>
-      <div class="factor-item">
-        <span class="factor-title">Language Match (15%)</span>
-        <span class="factor-val">${analysis.overallPerformance ? analysis.overallPerformance.factors.languageAlignment.score : 100}%</span>
-      </div>
-    </div>
-  </div>
-
-  ${analysis.rankingChanceReport ? `
-  <div class="score-card" style="border-left: 4px solid #28a79c; margin-bottom: 14px; background: #fafafc;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b;">
-          🎯 Your Chance of Ranking in Google (Algorithmic Score)
-        </div>
-        <div style="font-size: 26px; font-weight: 800; color: #28a79c; margin-top: 2px;">
-          ${analysis.rankingChanceReport.overallRankingChance}% <span style="font-size: 12px; font-weight: 700; color: #1e293b;">[${analysis.rankingChanceReport.tier}]</span>
-        </div>
-      </div>
-      <div style="text-align: right; font-size: 11px; color: #64748b; max-width: 320px;">
-        ${analysis.rankingChanceReport.verdict}
-      </div>
-    </div>
-
-    <div style="margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
-      <div style="font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Top 5 Queries Probability Breakdown:</div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-        <thead>
-          <tr style="border-bottom: 1px solid #e2e8f0; text-align: left; color: #64748b;">
-            <th style="padding: 4px 6px;">Query</th>
-            <th style="padding: 4px 6px; width: 60px;">Chance</th>
-            <th style="padding: 4px 6px; width: 100px;">Tier</th>
-            <th style="padding: 4px 6px;">Action to Rank Higher</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${analysis.rankingChanceReport.topQueries.map(q => `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-              <td style="padding: 5px 6px; font-weight: 600;">"${q.query}"</td>
-              <td style="padding: 5px 6px; font-weight: 800; color: #28a79c;">${q.chanceScore}%</td>
-              <td style="padding: 5px 6px;"><span class="badge" style="font-size: 8px;">${q.tier}</span></td>
-              <td style="padding: 5px 6px; color: #475569;">${q.actionToRankHigher}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  ` : ''}
-
-  ${analysis.intentMismatch ? `
-    <div class="mismatch-alert">
-      <strong>⚠️ Intent Mismatch Warning:</strong> ${analysis.intentMismatchReason}
-      <div style="margin-top: 4px;">User: ${analysis.userPageType} | Google Expects: ${analysis.topPagesType}</div>
-    </div>
-  ` : ''}
-
-  ${analysis.languageAudit ? `
-    <div class="mismatch-alert" style="background: ${analysis.languageAudit.isMismatch ? '#fff7ed' : '#f0fdf4'}; border-color: ${analysis.languageAudit.isMismatch ? '#ea580c' : '#86efac'}; color: ${analysis.languageAudit.isMismatch ? '#9a3412' : '#166534'};">
-      <strong>${analysis.languageAudit.isMismatch ? '⚠️ Language Mismatch Detected:' : '✓ Language Alignment Confirmed:'}</strong> 
-      ${analysis.languageAudit.isMismatch ? analysis.languageAudit.warningMessage : `Content language (${analysis.languageAudit.userLanguage.name}) matches Google's favored language (${analysis.languageAudit.favoredSerpLanguage.confidence}% of top results).`}
-      ${analysis.languageAudit.recommendation ? `<div style="margin-top: 4px; font-size: 10px;">${analysis.languageAudit.recommendation}</div>` : ''}
-    </div>
-  ` : ''}
-
-  <div class="section">
-    <div class="section-title">Top 3 Missing Topics</div>
-    <div class="topic-list">
-      ${analysis.missingTopics.map((t, i) => `
-        <div class="topic-item">
-          <div class="topic-num">${i + 1}</div>
-          <div>${t}</div>
-        </div>
-      `).join('')}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Priority Recommendations</div>
-    <div class="rec-list">
-      ${analysis.topRecommendations.map(r => `<div class="rec-item">${r}</div>`).join('')}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Suggested Content Structure (H2, H3 Hierarchy)</div>
-    ${analysis.suggestedStructure.map(s => `
-      <div class="structure-item" style="margin-left: ${(s.level || 'H2') === 'H2' ? '0' : '16px'}; border-left: 3px solid ${(s.level || 'H2') === 'H2' ? '#28a79c' : '#3b82f6'};">
-        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-          <span style="font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: ${(s.level || 'H2') === 'H2' ? 'rgba(40,167,156,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${(s.level || 'H2') === 'H2' ? '#28a79c' : '#2563eb'};">
-            ${s.level || 'H2'}
-          </span>
-          <span class="structure-head">${s.heading}</span>
-        </div>
-        <div style="color: #64748b; font-size: 11px;">${s.description}</div>
-      </div>
-    `).join('')}
-  </div>
-
-  ${analysis.scannabilityAudit ? `
-  <div class="section">
-    <div class="section-title">UI, UX &amp; Scannability Deterministic Audit</div>
-    <div class="score-card" style="display: flex; gap: 12px; margin-bottom: 12px; background: #f8fafc; border-color: #e2e8f0;">
-      <div style="flex: 1; text-align: center;">
-        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">H1 / H2</div>
-        <div style="font-size: 16px; font-weight: 800; color: #1e293b;">${analysis.scannabilityAudit.userMetrics.h1Count} / ${analysis.scannabilityAudit.userMetrics.h2Count}</div>
-        <div style="font-size: 9px; color: #86868b;">Top Avg: ${analysis.scannabilityAudit.topCompetitorAverages.avgH2Count} H2</div>
-      </div>
-      <div style="flex: 1; text-align: center;">
-        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">Images</div>
-        <div style="font-size: 16px; font-weight: 800; color: #1e293b;">${analysis.scannabilityAudit.userMetrics.imageCount}</div>
-        <div style="font-size: 9px; color: #86868b;">Top Avg: ${analysis.scannabilityAudit.topCompetitorAverages.avgImageCount}</div>
-      </div>
-      <div style="flex: 1; text-align: center;">
-        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">Videos</div>
-        <div style="font-size: 16px; font-weight: 800; color: #1e293b;">${analysis.scannabilityAudit.userMetrics.videoCount}</div>
-        <div style="font-size: 9px; color: #86868b;">Top Avg: ${analysis.scannabilityAudit.topCompetitorAverages.avgVideoCount}</div>
-      </div>
-      <div style="flex: 1; text-align: center;">
-        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">Table of Contents</div>
-        <div style="font-size: 14px; font-weight: 800; color: ${analysis.scannabilityAudit.userMetrics.hasTableOfContents ? '#10b981' : '#f59e0b'};">
-          ${analysis.scannabilityAudit.userMetrics.hasTableOfContents ? 'Yes' : 'No'}
-        </div>
-        <div style="font-size: 9px; color: #86868b;">${analysis.scannabilityAudit.topCompetitorAverages.tocAdoptionRate}% of SERP</div>
-      </div>
-    </div>
-
-    <div class="rec-list">
-      ${analysis.scannabilityAudit.checks.map(c => `
-        <div class="rec-item">
-          <strong>${c.label}</strong> [${c.status.toUpperCase()}]: You: <em>${c.userValue}</em> | Benchmark: <em>${c.competitorBenchmark}</em><br/>
-          <span style="color: #64748b; font-size: 10px;">${c.guidance}</span>
-        </div>
-      `).join('')}
-    </div>
-  </div>
-  ` : ''}
-
-  ${analysis.aiOverview ? `
-  <div class="section">
-    <div class="section-title">Google AI Overview &amp; Citations</div>
-    <div style="margin-bottom: 8px;">
-      <span class="badge" style="font-size: 10px; background: ${analysis.aiOverview.triggered ? 'rgba(40,167,156,0.15)' : '#f1f5f9'}; color: ${analysis.aiOverview.triggered ? '#28a79c' : '#64748b'};">
-        ${analysis.aiOverview.triggered ? '● Google AI Mode Triggered' : '○ AI Mode Not Triggered'}
-      </span>
-    </div>
-    ${analysis.aiOverview.snippet ? `
-      <div style="font-size: 11px; color: #475569; font-style: italic; background: #fafafc; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0;">
-        &ldquo;${analysis.aiOverview.snippet}&rdquo;
-      </div>
-    ` : ''}
-    ${analysis.aiOverview.references && analysis.aiOverview.references.length > 0 ? `
-      <div style="font-size: 11px; font-weight: 700; margin-bottom: 6px;">Pages Cited by Google AI (${analysis.aiOverview.references.length}):</div>
-      <div class="rec-list">
-        ${analysis.aiOverview.references.map(r => `
-          <div class="rec-item">
-            <strong>${r.title}</strong> (${r.domain || r.source})<br/>
-            <span style="color: #86868b; font-size: 9px;">${r.link}</span>
-            ${r.matchesCompetitorRank ? `<span class="badge" style="font-size: 8px; margin-left: 6px;">Matches Competitor #${r.matchesCompetitorRank}</span>` : ''}
-          </div>
-        `).join('')}
-      </div>
-    ` : ''}
-  </div>
-  ` : ''}
-
-  ${analysis.relatedSearches && analysis.relatedSearches.length > 0 ? `
-  <div class="section">
-    <div class="section-title">Google Suggested Related Searches</div>
-    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-      ${analysis.relatedSearches.map(item => `
-        <span class="badge" style="font-size: 9px; padding: 4px 8px;">${item.query}</span>
-      `).join('')}
-    </div>
-  </div>
-  ` : ''}
-
-  ${analysis.peopleAlsoAsk && analysis.peopleAlsoAsk.length > 0 ? `
-  <div class="section">
-    <div class="section-title">Google &ldquo;People Also Ask&rdquo; High-Intent Questions</div>
-    <div class="rec-list">
-      ${analysis.peopleAlsoAsk.map(q => `
-        <div class="rec-item">
-          <strong>${q.question}</strong>
-          ${q.snippet ? `<div style="color: #64748b; font-size: 9px; margin-top: 2px;">${q.snippet}</div>` : ''}
-        </div>
-      `).join('')}
-    </div>
-  </div>
-  ` : ''}
-
-  <div class="section">
-    <div class="section-title">Top 10 Google Competitors Breakdown</div>
-    <table class="competitor-table">
-      <thead>
-        <tr>
-          <th style="width: 36px;">Rank</th>
-          <th>Page Title & URL</th>
-          <th style="width: 85px;">Intent</th>
-          <th style="width: 130px;">Schema Types</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${competitors.map(c => {
-          const intentInfo = analysis.competitorIntents?.find(ci => ci.rank === c.position || ci.url === c.link);
-          const schemas = c.schemaTypes && c.schemaTypes.length > 0 
-            ? c.schemaTypes.map(s => `<span class="badge" style="font-size: 8px; margin-right: 2px; margin-bottom: 2px; display: inline-block;">${s}</span>`).join('') 
-            : '<span style="color: #94a3b8; font-size: 9px; font-style: italic;">None</span>';
-          return `
-            <tr>
-              <td><strong>#${c.position}</strong></td>
-              <td>
-                <div style="font-weight: 600;">${c.title}</div>
-                <div style="color: #86868b; font-size: 10px;">${c.link}</div>
-              </td>
-              <td>
-                <span class="badge" style="font-size: 9px;">${intentInfo?.intentCategory || 'General'}</span>
-              </td>
-              <td>
-                ${schemas}
-              </td>
-            </tr>
-          `;
-        }).join('')}
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    window.onload = function() {
-      setTimeout(function() {
-        window.print();
-      }, 300);
-    };
-  </script>
-</body>
-</html>
-  `;
-
-  printWindow.document.open();
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
+  downloadBlob(await response.blob(), getReportFilename(query.keyword, 'pdf'));
 }

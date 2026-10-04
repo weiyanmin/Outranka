@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InputForm, { FormSubmitData } from '../components/InputForm';
@@ -14,15 +14,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeKeyword, setActiveKeyword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [hasLatestReport, setHasLatestReport] = useState(false);
-
-  useEffect(() => {
-    setHasLatestReport(Boolean(
-      sessionStorage.getItem('outranka_analysis') &&
-      sessionStorage.getItem('outranka_competitors') &&
-      sessionStorage.getItem('outranka_query')
-    ));
-  }, []);
 
   const handleSubmit = async (data: FormSubmitData) => {
     setIsLoading(true);
@@ -44,12 +35,19 @@ export default function Home() {
       // Store in sessionStorage for /results route
       sessionStorage.setItem('outranka_analysis', JSON.stringify(result.analysis));
       sessionStorage.setItem('outranka_competitors', JSON.stringify(result.competitors));
+      if (result.auditId) sessionStorage.setItem('outranka_audit_id', result.auditId);
+      if (result.persistenceWarning) {
+        sessionStorage.setItem('outranka_audit_save_warning', result.persistenceWarning);
+      } else {
+        sessionStorage.removeItem('outranka_audit_save_warning');
+      }
       sessionStorage.setItem(
         'outranka_query',
         JSON.stringify({
           keyword: data.keyword,
           location: data.location,
           inputType: data.inputType,
+          sourceUrl: data.inputType === 'url' ? data.url : undefined,
         })
       );
 
@@ -79,14 +77,12 @@ export default function Home() {
 
           <div className="results-nav-actions">
             <AccountControl />
-            {hasLatestReport && (
-              <Link href="/results" className="results-nav-btn results-nav-btn-secondary" title="Open latest audit results">
-                <GoogleIcon name="description" size={16} color="currentColor" />
-                <span>Latest Results</span>
-              </Link>
-            )}
+            <Link href="/audits" className="results-nav-btn results-nav-btn-secondary" title="Browse past audits">
+              <GoogleIcon name="description" size={16} color="currentColor" />
+              <span>Past Audits</span>
+            </Link>
             <a href="#new-audit" className="results-nav-btn results-nav-btn-primary home-start-audit">
-              <GoogleIcon name="manage_search" size={16} color="currentColor" />
+              <GoogleIcon name="fact_check" size={16} color="currentColor" />
               <span>Start Audit</span>
             </a>
           </div>
@@ -96,7 +92,7 @@ export default function Home() {
       <div className="home-container">
         <header className="header">
           <div className="badge-pill">
-            <GoogleIcon name="track_changes" size={13} color="currentColor" /> 4-Intent SEO Analyzer
+            <GoogleIcon name="fact_check" size={13} color="currentColor" /> 4-Intent SEO Analyzer
           </div>
           <h1 className="title home-wordmark"><BrandMark size={46} /> <span>Outranka</span></h1>
           <p className="subtitle">

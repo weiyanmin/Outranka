@@ -10,6 +10,8 @@ import {
 import { calculateRankingChance } from '../../../lib/rankingChance';
 import { evaluateLanguageAlignment } from '../../../lib/language';
 import { calculateOverallPerformance } from '../../../lib/performanceScore';
+import { createClient } from '../../../lib/supabase/server';
+import { evaluateEeatSignals } from '../../../lib/eeat';
 
 export async function POST(req: NextRequest) {
   try {
@@ -116,6 +118,7 @@ export async function POST(req: NextRequest) {
     const competitorMetricsList = competitorPages.map((cp) => cp.content.metrics);
     const scannabilityAudit = evaluateScannabilityAndStructure(userMetrics, competitorMetricsList);
     analysis.scannabilityAudit = scannabilityAudit;
+    analysis.eeatAudit = evaluateEeatSignals(userTextContent);
     analysis.aiOverview = aiOverview;
     analysis.relatedSearches = serpData.relatedSearches || [];
     analysis.peopleAlsoAsk = serpData.peopleAlsoAsk || [];
@@ -163,8 +166,39 @@ export async function POST(req: NextRequest) {
       language: cp.content.language,
     }));
 
+    let auditId: string | null = null;
+    let persistenceWarning: string | null = null;
+    try {
+      const supabase = await createClient();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw userError || new Error('No authenticated user found.');
+
+      const { data: savedAudit, error: saveError } = await supabase
+        .from('audits')
+        .insert({
+          user_id: user.id,
+          keyword: keyword.trim(),
+          location: typeof location === 'string' && location ? location : 'global',
+          input_type: inputType === 'url' ? 'url' : 'text',
+          source_url: inputType === 'url' && typeof url === 'string' ? url.trim() : null,
+          analysis,
+          competitors: enrichedCompetitors,
+        })
+        .select('id')
+        .single();
+
+      if (saveError) throw saveError;
+      auditId = savedAudit.id;
+    } catch (saveError) {
+      console.error('Failed to save completed audit to Supabase.', saveError);
+      persistenceWarning = 'This report is available now, but could not be saved to Past Audits. Check that the Supabase audits migration has been applied.';
+    }
+
     return NextResponse.json({
       success: true,
+      auditId,
+      savedToSupabase: Boolean(auditId),
+      persistenceWarning,
       competitors: enrichedCompetitors,
       analysis,
       aiOverview,

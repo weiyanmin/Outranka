@@ -22,6 +22,8 @@ export default function AccountControl() {
   }, []);
 
   const signOut = async () => {
+    if (!window.confirm('Are you sure you want to sign out?')) return;
+
     try {
       await createClient().auth.signOut();
     } finally {

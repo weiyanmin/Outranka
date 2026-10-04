@@ -1,5 +1,6 @@
 import './globals.css';
 import React from 'react';
+import AppFooter from '../components/AppFooter';
 
 export const metadata = {
   title: 'Outranka — Search Intent & Competitor Content Analysis',
@@ -21,7 +22,10 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <AppFooter />
+      </body>
     </html>
   );
 }
