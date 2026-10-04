@@ -289,3 +289,25 @@ body {
   gap: 10px;
   margin-top: 20px;
 }
+
+.form-input.input-error, .form-textarea.input-error {
+  border-color: var(--error-text);
+  background: var(--error-bg);
+}
+
+.form-input.input-error:focus, .form-textarea.input-error:focus {
+  border-color: var(--error-text);
+  box-shadow: 0 0 0 3.5px rgba(215, 0, 21, 0.16);
+}
+
+.inline-field-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--error-text);
+  line-height: 1.35;
+}
+

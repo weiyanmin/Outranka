@@ -16,13 +16,115 @@ interface InputFormProps {
   isLoading?: boolean;
 }
 
+export function validateUrlInput(rawVal: string): { isValid: boolean; warning: string | null; formattedUrl?: string } {
+  const trimmed = rawVal.trim();
+  if (!trimmed) {
+    return { isValid: false, warning: 'Please enter a target URL to analyze.' };
+  }
+
+  // Detect email address pattern (e.g. weiyanmin@gmail.com)
+  if (trimmed.includes('@') && !trimmed.includes('://')) {
+    return {
+      isValid: false,
+      warning: 'Only URLs are allowed. Please do not enter an email address (e.g. https://example.com/article).'
+    };
+  }
+
+  // Spaces are not allowed in URLs
+  if (/\s/.test(trimmed)) {
+    return {
+      isValid: false,
+      warning: 'Only URLs are allowed. Web page URLs cannot contain spaces.'
+    };
+  }
+
+  let candidate = trimmed;
+  // If user entered ftp://, mailto:, etc.
+  if (/^[a-zA-Z0-9_-]+:/.test(candidate) && !candidate.startsWith('http://') && !candidate.startsWith('https://')) {
+    return {
+      isValid: false,
+      warning: 'Only web URLs (http:// or https://) are allowed.'
+    };
+  }
+
+  if (!candidate.startsWith('http://') && !candidate.startsWith('https://')) {
+    // If it looks like a domain name with a dot (e.g. example.com or news.domain.co/post)
+    if (/^[a-zA-Z0-9-]+\.[a-zA-Z0-9]/.test(candidate)) {
+      candidate = 'https://' + candidate;
+    } else {
+      return {
+        isValid: false,
+        warning: 'Only URLs are allowed (e.g. https://example.com/article).'
+      };
+    }
+  }
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return {
+        isValid: false,
+        warning: 'Only web URLs (http:// or https://) are allowed.'
+      };
+    }
+    if (!parsed.hostname || !parsed.hostname.includes('.') || parsed.hostname.endsWith('.')) {
+      return {
+        isValid: false,
+        warning: 'Only URLs are allowed (e.g. https://example.com/article).'
+      };
+    }
+    return { isValid: true, warning: null, formattedUrl: candidate };
+  } catch {
+    return {
+      isValid: false,
+      warning: 'Only URLs are allowed (e.g. https://example.com/article).'
+    };
+  }
+}
+
 export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
   const [keyword, setKeyword] = useState('');
   const [location, setLocation] = useState('global');
   const [inputType, setInputType] = useState<'text' | 'url'>('text');
   const [content, setContent] = useState('');
   const [url, setUrl] = useState('');
+  const [urlWarning, setUrlWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleUrlChange = (value: string) => {
+    setUrl(value);
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setUrlWarning(null);
+      return;
+    }
+    // Instant feedback if user is typing an email address or whitespace
+    if (trimmed.includes('@')) {
+      setUrlWarning('Only URLs are allowed. Please do not enter an email address (e.g. https://example.com/article).');
+    } else if (/\s/.test(trimmed)) {
+      setUrlWarning('Only URLs are allowed. Web page URLs cannot contain spaces.');
+    } else {
+      // If there was a previous warning, check if it is now valid so we clear it
+      const check = validateUrlInput(trimmed);
+      if (check.isValid) {
+        setUrlWarning(null);
+      }
+    }
+  };
+
+  const handleUrlBlur = () => {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setUrlWarning(null);
+      return;
+    }
+    const check = validateUrlInput(trimmed);
+    if (!check.isValid) {
+      setUrlWarning(check.warning);
+    } else {
+      setUrlWarning(null);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,20 +151,22 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
     } else {
       const trimmedUrl = url.trim();
       if (!trimmedUrl) {
+        setUrlWarning('Please enter a target URL to analyze.');
         setError('Please enter a target URL to analyze.');
         return;
       }
-      try {
-        new URL(trimmedUrl);
-      } catch {
-        setError('Please enter a valid URL (including https://).');
+      const check = validateUrlInput(trimmedUrl);
+      if (!check.isValid) {
+        setUrlWarning(check.warning);
+        setError(check.warning);
         return;
       }
+      setUrlWarning(null);
       onSubmit({
         keyword: trimmedKeyword,
         location,
         inputType: 'url',
-        url: trimmedUrl,
+        url: check.formattedUrl || trimmedUrl,
       });
     }
   };
@@ -117,7 +221,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           <button
             type="button"
             className={"segment-btn " + (inputType === 'text' ? 'active' : '')}
-            onClick={() => setInputType('text')}
+            onClick={() => { setInputType('text'); setError(null); }}
             disabled={isLoading}
             role="tab"
             aria-selected={inputType === 'text'}
@@ -127,7 +231,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
           <button
             type="button"
             className={"segment-btn " + (inputType === 'url' ? 'active' : '')}
-            onClick={() => setInputType('url')}
+            onClick={() => { setInputType('url'); setError(null); }}
             disabled={isLoading}
             role="tab"
             aria-selected={inputType === 'url'}
@@ -150,14 +254,27 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
         ) : (
           <div>
             <input
-              type="url"
-              className="form-input"
+              type="text"
+              className={`form-input ${urlWarning ? 'input-error' : ''}`}
               placeholder="https://example.com/best-dirty-coffee-phuket"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              onBlur={handleUrlBlur}
               disabled={isLoading}
               autoComplete="off"
             />
+            {urlWarning ? (
+              <div className="inline-field-warning">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>{urlWarning}</span>
+              </div>
+            ) : (
+              <p className="form-help">Enter the full web address of the published page (e.g. https://example.com/blog-post).</p>
+            )}
           </div>
         )}
       </div>
