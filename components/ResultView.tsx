@@ -341,9 +341,12 @@ export default function ResultView({ analysis }: ResultViewProps) {
           {/* Content Strengths */}
           {analysis.strengths && analysis.strengths.length > 0 && (
             <div className="card" style={{ margin: 0 }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '12px' }}>
-                What Your Content Does Well
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <GoogleIcon name="check_circle" size={20} color="#16a34a" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>
+                  What Your Content Does Well
+                </h3>
+              </div>
               <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {analysis.strengths.map((str, i) => (
                   <li key={i} style={{ fontSize: '0.9rem', color: '#16a34a', lineHeight: 1.45 }}>
@@ -363,9 +366,12 @@ export default function ResultView({ analysis }: ResultViewProps) {
           {/* Priority Recommendations */}
           {analysis.topRecommendations && analysis.topRecommendations.length > 0 && (
             <div className="card" style={{ margin: 0 }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '12px' }}>
-                Priority Recommendations to Outrank
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <GoogleIcon name="bolt" size={20} color="var(--accent-color)" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>
+                  Priority Recommendations to Outrank
+                </h3>
+              </div>
               <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {analysis.topRecommendations.map((rec, i) => (
                   <li key={i} style={{ fontSize: '0.9rem', color: 'var(--text-color)', lineHeight: 1.45 }}>

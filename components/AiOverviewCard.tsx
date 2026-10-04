@@ -37,7 +37,7 @@ export default function AiOverviewCard({ aiOverview }: AiOverviewCardProps) {
   let accumulatedOffset = 0;
 
   return (
-    <div className="card" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div className="card" style={{ position: 'relative', overflow: 'hidden', margin: 0 }}>
       {/* Header */}
       <div
         style={{
