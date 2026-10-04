@@ -327,3 +327,301 @@ body {
   line-height: 1.35;
 }
 
+/* ============================================================
+   Report dashboard: tab rail + bento cards
+   Uses only the existing color variables.
+   ============================================================ */
+@media (min-width: 992px) {
+  .results-container {
+    width: 90%;
+    max-width: 1480px;
+  }
+}
+
+.dash {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* Mobile / tablet: horizontal scrollable pill bar */
+.dash-rail {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: none;
+}
+.dash-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.dash-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--muted-text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 9px 16px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.dash-tab:hover {
+  color: var(--text-color);
+}
+.dash-tab.is-active {
+  background: var(--accent-light);
+  color: var(--accent-color);
+  border-color: rgba(40, 167, 156, 0.35);
+}
+.dash-tab:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+.dash-tab-label {
+  white-space: nowrap;
+}
+.dash-tab-alert {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+.dash-tab-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--segmented-bg);
+  color: var(--muted-text);
+  padding: 1px 8px;
+  border-radius: 9999px;
+}
+.dash-tab.is-active .dash-tab-count {
+  background: rgba(40, 167, 156, 0.15);
+  color: var(--accent-color);
+}
+.dash-panel {
+  min-width: 0;
+}
+
+/* Desktop: vertical rail */
+@media (min-width: 992px) {
+  .dash {
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 28px;
+  }
+  .dash-rail {
+    position: sticky;
+    top: 24px;
+    flex-direction: column;
+    gap: 4px;
+    overflow: visible;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    padding: 12px;
+  }
+  .dash-tab {
+    width: 100%;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+  .dash-tab:hover {
+    background: var(--bg-color);
+  }
+  .dash-tab.is-active {
+    background: var(--accent-light);
+  }
+  .dash-tab-label {
+    flex: 1;
+    text-align: left;
+  }
+}
+
+/* Bento grid (12 columns on wide screens, single column otherwise) */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+}
+.bento-card {
+  grid-column: span 12;
+  margin: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bento-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.bento-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-color);
+  margin: 0;
+}
+.bento-card-subtitle {
+  font-size: 0.82rem;
+  color: var(--muted-text);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+.bento-card-body {
+  flex: 1;
+}
+@media (min-width: 640px) {
+  .bento-card {
+    padding: 28px;
+  }
+}
+@media (min-width: 1100px) {
+  .bento-card.span-3 { grid-column: span 3; }
+  .bento-card.span-4 { grid-column: span 4; }
+  .bento-card.span-5 { grid-column: span 5; }
+  .bento-card.span-6 { grid-column: span 6; }
+  .bento-card.span-7 { grid-column: span 7; }
+  .bento-card.span-8 { grid-column: span 8; }
+}
+
+/* KPI strip */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-tile-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted-text);
+}
+.stat-tile-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-color);
+}
+.stat-tile-sub {
+  font-size: 0.8rem;
+  color: var(--muted-text);
+}
+@media (min-width: 900px) {
+  .stat-tile + .stat-tile {
+    border-left: 1px solid var(--border-color);
+    padding-left: 24px;
+  }
+}
+
+/* Lists */
+.clean-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}
+.clean-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+.num-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent-color);
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.divided > * + * {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+/* Inline callout banner */
+.callout {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  grid-column: span 12;
+}
+.callout-warning {
+  background: #fffbf0;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.callout-success {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.callout-body {
+  flex: 1;
+  min-width: 220px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-color);
+}
+
+/* Text-style button / link */
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--accent-color);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+.link-btn:hover {
+  color: var(--accent-hover);
+}
+.link-btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
