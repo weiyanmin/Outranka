@@ -6,6 +6,7 @@ import { OverallPerformanceReport } from '../../../lib/performanceScore';
 import GoogleIcon from '../../GoogleIcon';
 import RankingChanceCard from '../../RankingChanceCard';
 import RingGauge from '../../charts/RingGauge';
+import BarList from '../../charts/BarList';
 import { scoreColor } from '../../charts/colors';
 import SectionCard from '../SectionCard';
 import StatTile from '../StatTile';
@@ -38,11 +39,44 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
   const ai = analysis.aiOverview;
   const recs = analysis.topRecommendations || [];
 
-  const pillars = [
-    { name: 'Search Intent', f: perf.factors.searchIntent },
-    { name: 'UI/UX Scannability', f: perf.factors.scannabilityUx },
-    { name: 'Competitive Parity', f: perf.factors.competitiveParity },
-    { name: 'Language Match', f: perf.factors.languageAlignment },
+  const corePillars = [
+    { name: 'Search Intent', f: perf.pillars.searchIntent },
+    { name: 'Content Quality & First-Hand Data', f: perf.pillars.contentQuality },
+    { name: 'UI/UX Scannability', f: perf.pillars.scannabilityUx },
+    { name: 'Competitive Parity & Language', f: perf.pillars.competitiveParity },
+  ];
+
+  const algorithmicFactors = [
+    {
+      label: 'Search Intent (Query Relevance)',
+      value: analysis.factorScores?.queryRelevance || perf.factors.searchIntent.score,
+      hint: 'Target keyword relevance & intent satisfaction',
+    },
+    {
+      label: 'Content Quality (Readability)',
+      value: analysis.factorScores?.readability || perf.factors.contentQuality.score,
+      hint: 'Scanning ease, flow, and clarity',
+    },
+    {
+      label: 'UI/UX Scannability (Structure)',
+      value: analysis.factorScores?.structure || perf.factors.scannabilityUx.score,
+      hint: 'Heading hierarchy (H1-H3), images, and visual breaks',
+    },
+    {
+      label: 'First-Hand Data & Experience',
+      value: analysis.factorScores?.firstHandDataBonus || 30,
+      hint: 'Original insights, testing proof, and firsthand signals',
+    },
+    {
+      label: 'Competitive Parity',
+      value: perf.factors.competitiveParity.score,
+      hint: 'Subtopic coverage, schema markup, and SERP features',
+    },
+    {
+      label: 'Language Match',
+      value: perf.factors.languageAlignment.score,
+      hint: 'SERP regional and linguistic alignment',
+    },
   ];
 
   return (
@@ -99,7 +133,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
       {/* Overall score */}
       <SectionCard
         title="Overall Performance Score"
-        subtitle="Weighted across four pillars"
+        subtitle="Weighted across the 4 performance pillars"
         span={5}
         action={<Pill tone={gradeTone(perf.grade)}>{perf.grade}</Pill>}
       >
@@ -114,10 +148,15 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
         </div>
       </SectionCard>
 
-      {/* Pillars */}
-      <SectionCard title="Performance Pillars" subtitle="How each area contributes to your overall score" span={7}>
+      {/* 4 Performance Pillars */}
+      <SectionCard
+        title="4 Performance Pillars"
+        subtitle="Core algorithmic evaluation of your content against Google top rankings"
+        span={7}
+      >
+        {/* The 4 Core Pillar Rings */}
         <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {pillars.map(({ name, f }, i) => (
+          {corePillars.map(({ name, f }, i) => (
             <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '18px', paddingTop: i === 0 ? 0 : 18 }}>
               <RingGauge value={f.score} size={64} stroke={7} />
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -127,6 +166,23 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
               <Pill tone="neutral">{f.weight}% weight</Pill>
             </div>
           ))}
+        </div>
+
+        {/* Detailed Algorithmic Breakdown */}
+        <div style={{ marginTop: '26px', paddingTop: '22px', borderTop: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+              Algorithmic Factors Breakdown
+            </span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
+              6 Ranking Factors
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px 28px' }}>
+            <BarList items={algorithmicFactors.slice(0, 3)} barHeight={7} gap={14} />
+            <BarList items={algorithmicFactors.slice(3, 6)} barHeight={7} gap={14} />
+          </div>
         </div>
       </SectionCard>
 

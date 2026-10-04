@@ -4,7 +4,6 @@ import React from 'react';
 import { AnalysisResult } from '../../../lib/analyze';
 import GoogleIcon from '../../GoogleIcon';
 import RankingChanceCard from '../../RankingChanceCard';
-import BarList from '../../charts/BarList';
 import StackedBar from '../../charts/StackedBar';
 import { COLORS } from '../../charts/colors';
 import SectionCard from '../SectionCard';
@@ -26,13 +25,6 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
     .map(([label, value]) => ({ label, value, color: INTENT_COLORS[label] || COLORS.neutral }))
     .sort((a, b) => b.value - a.value);
   const dominant = segments[0];
-
-  const factors = [
-    { label: 'Query relevance', value: analysis.factorScores.queryRelevance },
-    { label: 'Structure', value: analysis.factorScores.structure },
-    { label: 'Readability', value: analysis.factorScores.readability },
-    { label: 'First-hand data & experience', value: analysis.factorScores.firstHandDataBonus },
-  ];
 
   const blockStyle: React.CSSProperties = {
     background: '#fafafc',
@@ -107,14 +99,6 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
         ) : (
           <p style={{ fontSize: '0.88rem', color: 'var(--muted-text)' }}>No competitor intent data available.</p>
         )}
-      </SectionCard>
-
-      <SectionCard title="Content Quality Factors" subtitle="How your draft scores on the core ranking factors" span={12}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '28px' }}>
-          {factors.map((f) => (
-            <BarList key={f.label} items={[f]} />
-          ))}
-        </div>
       </SectionCard>
 
       {analysis.rankingChanceReport && <RankingChanceCard report={analysis.rankingChanceReport} variant="detail" span={12} />}
