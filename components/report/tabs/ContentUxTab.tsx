@@ -20,27 +20,108 @@ const groupLabel: React.CSSProperties = {
   marginBottom: '14px',
 };
 
-function IssueRow({ chk }: { chk: Check }) {
+function ScannabilityCheckCard({ chk }: { chk: Check }) {
   const isAlert = chk.status === 'alert';
-  const color = isAlert ? COLORS.danger : COLORS.warning;
+  const isWarning = chk.status === 'warning';
+
+  const tone = isAlert ? 'danger' : isWarning ? 'warning' : 'success';
+  const statusLabel = isAlert ? 'Needs Attention' : isWarning ? 'Could Improve' : 'Optimal';
+  const iconName = isAlert ? 'error' : isWarning ? 'warning' : 'check_circle';
+  const iconColor = isAlert ? COLORS.danger : isWarning ? COLORS.warning : COLORS.success;
+  const iconBg = isAlert ? '#fef2f2' : isWarning ? '#fffbeb' : '#ecfdf5';
+
   return (
-    <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-      <GoogleIcon name={isAlert ? 'error' : 'warning'} size={20} color={color} style={{ marginTop: 1 }} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', alignItems: 'baseline' }}>
-          <span style={{ fontSize: '0.94rem', fontWeight: 600, color: 'var(--text-color)' }}>{chk.label}</span>
-          <span style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}>
-            You <strong style={{ color: 'var(--text-color)' }}>{chk.userValue}</strong> · Benchmark{' '}
-            <strong style={{ color: 'var(--text-color)' }}>{chk.competitorBenchmark}</strong>
-          </span>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        gap: '20px',
+        padding: '16px 20px',
+        background: 'var(--card-bg)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+        flexWrap: 'wrap',
+      }}
+    >
+      {/* Left: Icon, Title, Badge, Guidance */}
+      <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', flex: 1, minWidth: '260px' }}>
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            background: iconBg,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            marginTop: '2px',
+          }}
+        >
+          <GoogleIcon name={iconName} size={20} color={iconColor} />
         </div>
-        <p style={{ fontSize: '0.86rem', lineHeight: 1.5, color: 'var(--muted-text)', marginTop: 4 }}>{chk.guidance}</p>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.96rem', fontWeight: 600, color: 'var(--text-color)' }}>
+              {chk.label}
+            </span>
+            <Pill tone={tone}>{statusLabel}</Pill>
+          </div>
+          <p style={{ fontSize: '0.86rem', lineHeight: 1.5, color: 'var(--muted-text)', margin: '6px 0 0' }}>
+            {chk.guidance || 'Matches top ranking competitor scannability standards.'}
+          </p>
+        </div>
+      </div>
+
+      {/* Right: Metrics comparison pill */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+          padding: '8px 14px',
+          background: 'var(--segmented-bg)',
+          borderRadius: '8px',
+          border: '1px solid var(--border-color)',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+            Your Draft
+          </div>
+          <div
+            style={{
+              fontSize: '0.86rem',
+              fontWeight: 700,
+              color: isAlert ? COLORS.danger : isWarning ? COLORS.warning : 'var(--text-color)',
+              marginTop: '2px',
+            }}
+          >
+            {chk.userValue}
+          </div>
+        </div>
+
+        <div style={{ width: '1px', height: '24px', background: 'var(--border-color)' }} />
+
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+            Top 10 Benchmark
+          </div>
+          <div style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--muted-text)', marginTop: '2px' }}>
+            {chk.competitorBenchmark}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 export default function ContentUxTab({ analysis }: { analysis: AnalysisResult }) {
+  const [filter, setFilter] = React.useState<'all' | 'issues' | 'passing'>('all');
   const audit = analysis.scannabilityAudit;
   const strengths = analysis.strengths || [];
 
@@ -59,6 +140,7 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
   const alerts = audit.checks.filter((c) => c.status === 'alert');
   const warnings = audit.checks.filter((c) => c.status === 'warning');
   const passes = audit.checks.filter((c) => c.status === 'pass');
+  const issuesCount = alerts.length + warnings.length;
 
   const statusRows = [
     { label: 'Passing', count: passes.length, color: COLORS.success },
@@ -79,6 +161,10 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
     },
     { label: 'Estimated reading time', you: `${u.estimatedReadingTimeMin} min`, note: `${u.wordCount.toLocaleString()} words` },
   ];
+
+  const showNeedsAttention = (filter === 'all' || filter === 'issues') && alerts.length > 0;
+  const showCouldImprove = (filter === 'all' || filter === 'issues') && warnings.length > 0;
+  const showPassing = (filter === 'all' || filter === 'passing') && passes.length > 0;
 
   return (
     <div className="bento">
@@ -135,43 +221,118 @@ export default function ContentUxTab({ analysis }: { analysis: AnalysisResult })
         title="Scannability Checks"
         subtitle="Automated structure checks against the top 10 competitors"
         span={12}
-        action={<Pill tone="accent">{audit.checks.length} checks</Pill>}
+        action={
+          <div
+            style={{
+              display: 'inline-flex',
+              padding: '3px',
+              background: 'var(--segmented-bg)',
+              borderRadius: '8px',
+              gap: '2px',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            {[
+              { id: 'all', label: `All (${audit.checks.length})` },
+              { id: 'issues', label: `Issues (${issuesCount})` },
+              { id: 'passing', label: `Passing (${passes.length})` },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setFilter(t.id as any)}
+                style={{
+                  border: 'none',
+                  background: filter === t.id ? '#ffffff' : 'transparent',
+                  color: filter === t.id ? 'var(--text-color)' : 'var(--muted-text)',
+                  fontSize: '0.78rem',
+                  fontWeight: filter === t.id ? 700 : 500,
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  boxShadow: filter === t.id ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {alerts.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {showNeedsAttention && (
             <div>
-              <div style={groupLabel}>Needs attention · {alerts.length}</div>
-              <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+                  Needs attention
+                </span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#fee2e2', color: COLORS.danger, padding: '1px 8px', borderRadius: '10px' }}>
+                  {alerts.length}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {alerts.map((c) => (
-                  <IssueRow key={c.id} chk={c} />
+                  <ScannabilityCheckCard key={c.id} chk={c} />
                 ))}
               </div>
             </div>
           )}
 
-          {warnings.length > 0 && (
+          {showCouldImprove && (
             <div>
-              <div style={groupLabel}>Could be improved · {warnings.length}</div>
-              <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+                  Could be improved
+                </span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#fef3c7', color: '#b45309', padding: '1px 8px', borderRadius: '10px' }}>
+                  {warnings.length}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {warnings.map((c) => (
-                  <IssueRow key={c.id} chk={c} />
+                  <ScannabilityCheckCard key={c.id} chk={c} />
                 ))}
               </div>
             </div>
           )}
 
-          {passes.length > 0 && (
+          {showPassing && (
             <div>
-              <div style={groupLabel}>Passing · {passes.length}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--muted-text)' }}>
+                  Passing checks
+                </span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#d1fae5', color: '#047857', padding: '1px 8px', borderRadius: '10px' }}>
+                  {passes.length}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {passes.map((c) => (
-                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: 'var(--text-color)' }}>
-                    <GoogleIcon name="check_circle" size={18} color={COLORS.success} />
-                    <span style={{ flex: 1 }}>{c.label}</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}>{c.userValue}</span>
-                  </div>
+                  <ScannabilityCheckCard key={c.id} chk={c} />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Empty state for issues filter */}
+          {filter === 'issues' && issuesCount === 0 && (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '36px 20px',
+                background: 'var(--segmented-bg)',
+                borderRadius: '12px',
+                border: '1px dashed var(--border-color)',
+              }}
+            >
+              <GoogleIcon name="check_circle" size={32} color={COLORS.success} />
+              <div style={{ fontSize: '0.96rem', fontWeight: 600, color: 'var(--text-color)', marginTop: '8px' }}>
+                No Scannability Issues Found
+              </div>
+              <p style={{ fontSize: '0.84rem', color: 'var(--muted-text)', marginTop: '4px' }}>
+                All 6 automated checks match or exceed top competitor benchmarks.
+              </p>
             </div>
           )}
         </div>
