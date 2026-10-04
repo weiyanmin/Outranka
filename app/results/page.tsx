@@ -118,225 +118,161 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="results-container">
-      {/* Top Navigation & Action Bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '24px',
-          flexWrap: 'wrap',
-          gap: '12px',
-        }}
-      >
-        <Link
-          href="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: 'var(--muted-text)',
-            textDecoration: 'none',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            padding: '7px 14px',
-            background: 'var(--card-bg)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <GoogleIcon name="arrow_back" size={15} color="var(--muted-text)" />
-          <span>New Audit</span>
-        </Link>
+    <>
+      {/* Sticky Navigation Bar */}
+      <header className="results-sticky-nav">
+        <div className="results-nav-inner">
+          <div className="results-nav-left">
+            <Link href="/" className="results-nav-brand" title="Outranka - Back to Home">
+              <span className="results-nav-logo-mark">
+                <GoogleIcon name="auto_awesome" size={17} color="#ffffff" />
+              </span>
+              <span>Outranka</span>
+            </Link>
 
-        {/* Download Report Dropdown */}
-        <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
-          <button
-            onClick={() => setIsDownloadOpen((prev) => !prev)}
-            aria-expanded={isDownloadOpen}
-            aria-haspopup="true"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: isDownloadOpen ? 'var(--accent-light)' : '#ffffff',
-              color: 'var(--accent-color)',
-              border: '1px solid var(--accent-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '7px 16px',
-              fontSize: '0.88rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              boxShadow: isDownloadOpen ? '0 0 0 3px rgba(40, 167, 156, 0.15)' : 'none',
-            }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>Download report</span>
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                transform: isDownloadOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}
-            >
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
+            <div className="results-nav-divider" />
 
-          {/* Dropdown Menu */}
-          {isDownloadOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 6px)',
-                right: 0,
-                background: '#ffffff',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-md)',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)',
-                padding: '6px',
-                minWidth: '220px',
-                zIndex: 100,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2px',
-                animation: 'fadeInMenu 0.15s ease-out',
-              }}
-            >
-              <button
-                onClick={handleDownloadMarkdown}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  width: '100%',
-                  padding: '9px 12px',
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--text-color)',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  textAlign: 'left',
-                  borderRadius: 'var(--radius-sm)',
-                  cursor: 'pointer',
-                  transition: 'background 0.12s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-color)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '5px',
-                    background: 'var(--accent-light)',
-                    color: 'var(--accent-color)',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    flexShrink: 0,
-                  }}
-                >
-                  MD
-                </span>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 600 }}>Download as Markdown</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>.md text file</span>
-                </div>
-              </button>
-
-              <button
-                onClick={handleDownloadPdf}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  width: '100%',
-                  padding: '9px 12px',
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--text-color)',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  textAlign: 'left',
-                  borderRadius: 'var(--radius-sm)',
-                  cursor: 'pointer',
-                  transition: 'background 0.12s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-color)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '5px',
-                    background: '#fee2e2',
-                    color: '#dc2626',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    flexShrink: 0,
-                  }}
-                >
-                  PDF
-                </span>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 600 }}>Download as PDF</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>Formatted print & save</span>
-                </div>
-              </button>
+            <div className="results-nav-context">
+              <span className="results-nav-keyword" title={query.keyword}>
+                &ldquo;{query.keyword}&rdquo;
+              </span>
+              <span className="results-nav-location">
+                {query.location.toUpperCase()}
+              </span>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Audit Meta Header */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-color)', letterSpacing: '-0.02em' }}>
-            &quot;{query.keyword}&quot;
-          </h1>
-          <span
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              background: 'var(--accent-light)',
-              color: 'var(--accent-color)',
-              padding: '3px 9px',
-              borderRadius: '9999px',
-            }}
-          >
-            {query.location.toUpperCase()}
-          </span>
+          <div className="results-nav-actions">
+            <Link href="/" className="results-nav-btn results-nav-btn-secondary" title="Start a new search intent audit">
+              <GoogleIcon name="arrow_back" size={15} color="currentColor" />
+              <span>New Audit</span>
+            </Link>
+
+            <div ref={dropdownRef} className="results-nav-dropdown-wrapper">
+              <button
+                onClick={() => setIsDownloadOpen((prev) => !prev)}
+                className={`results-nav-btn results-nav-btn-primary ${isDownloadOpen ? 'active' : ''}`}
+                aria-expanded={isDownloadOpen}
+                aria-haspopup="true"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download Report</span>
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{
+                    transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transform: isDownloadOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {isDownloadOpen && (
+                <div className="results-nav-dropdown-menu">
+                  <button
+                    onClick={handleDownloadMarkdown}
+                    className="results-nav-dropdown-item"
+                  >
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '6px',
+                        background: 'var(--accent-light)',
+                        color: 'var(--accent-color)',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        flexShrink: 0,
+                      }}
+                    >
+                      MD
+                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>Download as Markdown</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>.md text file</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={handleDownloadPdf}
+                    className="results-nav-dropdown-item"
+                  >
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '6px',
+                        background: '#fee2e2',
+                        color: '#dc2626',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        flexShrink: 0,
+                      }}
+                    >
+                      PDF
+                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>Download as PDF</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>Formatted print & save</span>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', marginTop: '4px' }}>
-          Audit completed against top 10 competitors ranking in Google
-        </p>
-      </div>
+      </header>
+
+      <div className="results-container">
+        {/* Audit Meta Header */}
+        <div style={{ marginBottom: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-color)', letterSpacing: '-0.02em' }}>
+              &quot;{query.keyword}&quot;
+            </h1>
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                background: 'var(--accent-light)',
+                color: 'var(--accent-color)',
+                padding: '3px 9px',
+                borderRadius: '9999px',
+                border: '1px solid rgba(40, 167, 156, 0.25)',
+              }}
+            >
+              {query.location.toUpperCase()}
+            </span>
+          </div>
+          <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', marginTop: '4px' }}>
+            Audit completed against top 10 competitors ranking in Google
+          </p>
+        </div>
 
       {/* Tabbed dashboard (competitors live in their own tab) */}
       <ResultView analysis={analysis} competitors={competitors} />
     </div>
-  );
+  </>
+);
 }
