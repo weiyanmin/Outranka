@@ -154,46 +154,6 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
         title="4 Performance Pillars"
         subtitle="Core algorithmic evaluation of your content against Google top rankings"
         span={7}
-        action={
-          <button
-            type="button"
-            onClick={() => setShowBreakdown((prev) => !prev)}
-            aria-expanded={showBreakdown}
-            aria-controls="algorithmic-factors-breakdown"
-            style={{
-              background: showBreakdown ? 'var(--accent-light)' : 'var(--segmented-bg)',
-              color: showBreakdown ? 'var(--accent-color)' : 'var(--text-color)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              padding: '5px 12px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <span>{showBreakdown ? 'Hide details' : 'Learn more'}</span>
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                transform: showBreakdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
-              }}
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-        }
       >
         {/* The 4 Core Pillar Rings */}
         <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
