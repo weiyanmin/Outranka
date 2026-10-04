@@ -184,7 +184,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
             }}
           >
             <span style={{ fontSize: '0.82rem', color: 'var(--muted-text)' }}>
-              Detailed breakdown of all 6 ranking factors
+              Detailed breakdown of all 6 metrics
             </span>
             <button
               type="button"
@@ -221,7 +221,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
-                  6 Ranking Factors
+                  6 Metrics
                 </span>
                 <button
                   type="button"
