@@ -3,142 +3,95 @@
 import React from 'react';
 import { LanguageAuditResult } from '../lib/language';
 import GoogleIcon from './GoogleIcon';
+import StackedBar from './charts/StackedBar';
+import { COLORS } from './charts/colors';
+import SectionCard from './report/SectionCard';
+import Pill from './report/Pill';
 
 interface LanguageMismatchBannerProps {
   languageAudit?: LanguageAuditResult;
+  span?: 3 | 4 | 5 | 6 | 7 | 8 | 12;
 }
 
-export default function LanguageMismatchBanner({ languageAudit }: LanguageMismatchBannerProps) {
+const OTHER_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#64748b', '#6366f1'];
+
+const labelStyle: React.CSSProperties = {
+  fontSize: '0.72rem',
+  fontWeight: 700,
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase',
+  color: 'var(--muted-text)',
+};
+
+export default function LanguageMismatchBanner({ languageAudit, span = 12 }: LanguageMismatchBannerProps) {
   if (!languageAudit) return null;
 
-  const { userLanguage, favoredSerpLanguage, isMismatch, competitorLanguagesBreakdown, warningMessage, recommendation } =
-    languageAudit;
+  const { userLanguage, favoredSerpLanguage, isMismatch, competitorLanguagesBreakdown, warningMessage, recommendation } = languageAudit;
 
-  // Render language mismatch alert or language parity confirmation
-  if (isMismatch) {
-    return (
-      <div
-        className="card"
-        style={{
-          background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-          border: '1.5px solid #f97316',
-          borderRadius: 'var(--radius-md)',
-          padding: '16px 18px',
-          marginBottom: '16px',
-          boxShadow: '0 2px 10px rgba(249, 115, 22, 0.1)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <GoogleIcon name="language" size={22} color="#9a3412" />
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9a3412', margin: 0, letterSpacing: '-0.01em' }}>
-              SERP Language Mismatch Detected
-            </h3>
-          </div>
+  let otherIndex = 0;
+  const segments = competitorLanguagesBreakdown.map((item) => ({
+    label: item.language,
+    value: item.count,
+    color: item.code === favoredSerpLanguage.code ? COLORS.accent : OTHER_COLORS[otherIndex++ % OTHER_COLORS.length],
+  }));
 
-          <span
-            style={{
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              background: '#ea580c',
-              color: '#ffffff',
-              padding: '2px 8px',
-              borderRadius: '9999px',
-            }}
-          >
-            Google Favors {favoredSerpLanguage.name}
-          </span>
-        </div>
-
-        <p style={{ fontSize: '0.88rem', color: '#7c2d12', lineHeight: 1.45, marginBottom: '10px' }}>
-          {warningMessage}
-        </p>
-
-        {/* Breakdown bar */}
-        <div
-          style={{
-            background: 'rgba(255, 255, 255, 0.7)',
-            border: '1px solid rgba(249, 115, 22, 0.25)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '10px 12px',
-            marginBottom: '10px',
-            fontSize: '0.82rem',
-            color: '#7c2d12',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-            <span>Your Content Language: <strong>{userLanguage.name}</strong> ({userLanguage.code.toUpperCase()})</span>
-            <span>Google Favored Language: <strong>{favoredSerpLanguage.name}</strong> ({favoredSerpLanguage.confidence}% of Top 10)</span>
-          </div>
-
-          {/* Languages distribution pills */}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '6px' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#9a3412' }}>Top 10 Breakdown:</span>
-            {competitorLanguagesBreakdown.map((item) => (
-              <span
-                key={item.code}
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  background: item.code === favoredSerpLanguage.code ? '#ffedd5' : '#ffffff',
-                  border: '1px solid rgba(249, 115, 22, 0.3)',
-                  padding: '2px 7px',
-                  borderRadius: '6px',
-                  color: '#9a3412',
-                }}
-              >
-                {item.language}: {item.percentage}% ({item.count})
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ fontSize: '0.82rem', color: '#9a3412', lineHeight: 1.4 }}>
-          <strong>Actionable Advice:</strong> {recommendation}
-        </div>
-      </div>
-    );
-  }
-
-  // Matching Language Pill/Card
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '10px 14px',
-        background: '#f0fdf4',
-        border: '1px solid #86efac',
-        borderRadius: 'var(--radius-md)',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-        gap: '8px',
-        fontSize: '0.84rem',
-      }}
+    <SectionCard
+      title="Language Alignment"
+      subtitle="The language of your content vs. the pages Google ranks"
+      span={span}
+      action={<Pill tone={isMismatch ? 'warning' : 'success'}>{isMismatch ? 'Mismatch' : 'Match'}</Pill>}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <GoogleIcon name="language" size={17} color="#166534" />
-        <span style={{ color: '#166534', fontWeight: 600 }}>
-          Language Match: Google favors <strong>{favoredSerpLanguage.name}</strong> for this query &amp; location, which matches your content.
-        </span>
-      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <div style={labelStyle}>Your content</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-color)', marginTop: 6 }}>{userLanguage.name}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}>{userLanguage.code.toUpperCase()}</div>
+          </div>
+          <div>
+            <div style={labelStyle}>Google favors</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 700, color: isMismatch ? '#b45309' : 'var(--accent-color)', marginTop: 6 }}>
+              {favoredSerpLanguage.name}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--muted-text)' }}>{favoredSerpLanguage.confidence}% of top 10</div>
+          </div>
+        </div>
 
-      <span
-        style={{
-          fontSize: '0.72rem',
-          fontWeight: 700,
-          background: '#dcfce7',
-          color: '#15803d',
-          padding: '2px 8px',
-          borderRadius: '9999px',
-          border: '1px solid #bbf7d0',
-        }}
-      >
-        {favoredSerpLanguage.confidence}% {favoredSerpLanguage.name} in Top 10
-      </span>
-    </div>
+        {segments.length > 0 && (
+          <div>
+            <div style={{ ...labelStyle, marginBottom: 14 }}>Top 10 language breakdown</div>
+            <StackedBar segments={segments} totalLabel="pages" />
+          </div>
+        )}
+
+        {isMismatch ? (
+          <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {warningMessage && (
+              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <GoogleIcon name="warning" size={20} color="#b45309" style={{ marginTop: 1 }} />
+                <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: 'var(--text-color)' }}>{warningMessage}</p>
+              </div>
+            )}
+            {recommendation && (
+              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <GoogleIcon name="bolt" size={20} color="var(--accent-color)" style={{ marginTop: 1 }} />
+                <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: 'var(--text-color)' }}>
+                  <strong>What to do: </strong>
+                  {recommendation}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <GoogleIcon name="check_circle" size={20} color={COLORS.success} />
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-color)' }}>
+              Google favors {favoredSerpLanguage.name} for this query and location, which matches your content.
+            </span>
+          </div>
+        )}
+      </div>
+    </SectionCard>
   );
 }

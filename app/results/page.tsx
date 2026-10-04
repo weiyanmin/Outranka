@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import ResultView from '../../components/ResultView';
-import CompetitorList from '../../components/CompetitorList';
 import GoogleIcon from '../../components/GoogleIcon';
 import { AnalysisResult } from '../../lib/analyze';
 import { SerpResultItem } from '../../lib/serp';
@@ -336,17 +335,8 @@ export default function ResultsPage() {
         </p>
       </div>
 
-      {/* Main Analysis Display */}
-      <ResultView analysis={analysis} />
-
-      {/* Competitors Showcase */}
-      {competitors.length > 0 && (
-        <CompetitorList
-          competitors={competitors}
-          competitorIntents={analysis.competitorIntents}
-          aiOverview={analysis.aiOverview}
-        />
-      )}
+      {/* Tabbed dashboard (competitors live in their own tab) */}
+      <ResultView analysis={analysis} competitors={competitors} />
     </div>
   );
 }

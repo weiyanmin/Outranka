@@ -3,281 +3,148 @@
 import React, { useState } from 'react';
 import { RelatedSearchItem, PeopleAlsoAskItem } from '../lib/serp';
 import GoogleIcon from './GoogleIcon';
+import SectionCard from './report/SectionCard';
 
 interface RelatedKeywordsCardProps {
   relatedSearches?: RelatedSearchItem[];
   peopleAlsoAsk?: PeopleAlsoAskItem[];
+  span?: 3 | 4 | 5 | 6 | 7 | 8 | 12;
 }
 
-export default function RelatedKeywordsCard({
-  relatedSearches = [],
-  peopleAlsoAsk = [],
-}: RelatedKeywordsCardProps) {
+const KEYWORD_LIMIT = 8;
+const QUESTION_LIMIT = 4;
+
+export default function RelatedKeywordsCard({ relatedSearches = [], peopleAlsoAsk = [], span = 12 }: RelatedKeywordsCardProps) {
   const [activeTab, setActiveTab] = useState<'keywords' | 'questions'>('keywords');
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hasKeywords = relatedSearches.length > 0;
   const hasQuestions = peopleAlsoAsk.length > 0;
+  if (!hasKeywords && !hasQuestions) return null;
 
-  if (!hasKeywords && !hasQuestions) {
-    return null;
-  }
+  const currentTab = !hasKeywords ? 'questions' : !hasQuestions ? 'keywords' : activeTab;
+  const total = currentTab === 'keywords' ? relatedSearches.length : peopleAlsoAsk.length;
+  const limit = currentTab === 'keywords' ? KEYWORD_LIMIT : QUESTION_LIMIT;
+  const noun = currentTab === 'keywords' ? 'searches' : 'questions';
 
-  // Choose default tab if one is empty
-  const currentTab = !hasKeywords && hasQuestions ? 'questions' : !hasQuestions && hasKeywords ? 'keywords' : activeTab;
+  const switchTab = (tab: 'keywords' | 'questions') => {
+    setActiveTab(tab);
+    setIsExpanded(false);
+  };
 
-  const currentItemsCount = currentTab === 'keywords' ? relatedSearches.length : peopleAlsoAsk.length;
-  const displayedKeywords = isExpanded ? relatedSearches : relatedSearches.slice(0, 4);
-  const displayedQuestions = isExpanded ? peopleAlsoAsk : peopleAlsoAsk.slice(0, 3);
+  const toggle = (
+    <div style={{ display: 'flex', background: 'var(--segmented-bg)', borderRadius: 10, padding: 3 }}>
+      {([
+        ['keywords', `Related searches (${relatedSearches.length})`],
+        ['questions', `People also ask (${peopleAlsoAsk.length})`],
+      ] as const).map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => switchTab(id)}
+          style={{
+            border: 'none',
+            background: currentTab === id ? '#ffffff' : 'transparent',
+            color: currentTab === id ? 'var(--text-color)' : 'var(--muted-text)',
+            fontFamily: 'inherit',
+            fontWeight: currentTab === id ? 600 : 500,
+            fontSize: '0.8rem',
+            padding: '6px 12px',
+            borderRadius: 8,
+            cursor: 'pointer',
+            boxShadow: currentTab === id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="card">
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '12px',
-          flexWrap: 'wrap',
-          gap: '8px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <GoogleIcon name="search" size={20} color="var(--accent-color)" />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
-            Google Related Searches &amp; Questions
-          </h3>
-        </div>
-
-        {hasKeywords && hasQuestions && (
-          <div
-            style={{
-              display: 'flex',
-              background: 'var(--segmented-bg)',
-              borderRadius: '8px',
-              padding: '2px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('keywords');
-                setIsExpanded(false);
-              }}
-              style={{
-                border: 'none',
-                background: currentTab === 'keywords' ? '#ffffff' : 'transparent',
-                color: currentTab === 'keywords' ? 'var(--text-color)' : 'var(--muted-text)',
-                fontWeight: currentTab === 'keywords' ? 600 : 500,
-                fontSize: '0.78rem',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                boxShadow: currentTab === 'keywords' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              Related Searches ({relatedSearches.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('questions');
-                setIsExpanded(false);
-              }}
-              style={{
-                border: 'none',
-                background: currentTab === 'questions' ? '#ffffff' : 'transparent',
-                color: currentTab === 'questions' ? 'var(--text-color)' : 'var(--muted-text)',
-                fontWeight: currentTab === 'questions' ? 600 : 500,
-                fontSize: '0.78rem',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                boxShadow: currentTab === 'questions' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              People Also Ask ({peopleAlsoAsk.length})
-            </button>
-          </div>
-        )}
-      </div>
-
-      <p style={{ fontSize: '0.84rem', color: 'var(--muted-text)', lineHeight: 1.45, marginBottom: '14px' }}>
-        {currentTab === 'keywords'
-          ? 'Related query variations Google suggests users search next. Incorporate these semantic terms naturally into your draft.'
-          : 'High-intent questions searchers commonly expand on Google. Answering these directly in your H2/H3 subheadings can help you capture featured snippets.'}
-      </p>
-
-      {/* Tab 1: Related Keywords / Searches */}
+    <SectionCard
+      title="Related Searches & Questions"
+      subtitle={
+        currentTab === 'keywords'
+          ? 'Variations Google suggests next. Work these terms naturally into your draft.'
+          : 'Questions searchers ask. Answer them under H2/H3 headings to win featured snippets.'
+      }
+      span={span}
+      action={hasKeywords && hasQuestions ? toggle : undefined}
+    >
       {currentTab === 'keywords' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {displayedKeywords.map((item, idx) => (
-              <a
-                key={idx}
-                href={item.link || `https://www.google.com/search?q=${encodeURIComponent(item.query)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#fafafc',
-                  border: '1px solid var(--border-color)',
-                  color: 'var(--text-color)',
-                  padding: '7px 12px',
-                  borderRadius: '9999px',
-                  fontSize: '0.82rem',
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--accent-color)';
-                  e.currentTarget.style.background = 'var(--accent-light)';
-                  e.currentTarget.style.color = 'var(--accent-color)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-color)';
-                  e.currentTarget.style.background = '#fafafc';
-                  e.currentTarget.style.color = 'var(--text-color)';
-                }}
-              >
-                <GoogleIcon name="search" size={13} color="currentColor" />
-                <span>{item.query}</span>
-              </a>
-            ))}
-          </div>
-
-          {relatedSearches.length > 4 && (
-            <div style={{ textAlign: 'center', marginTop: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'transparent',
-                  color: 'var(--accent-color)',
-                  border: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                }}
-              >
-                {isExpanded ? (
-                  <>
-                    <span>Show Less</span>
-                    <GoogleIcon name="expand_less" size={16} color="var(--accent-color)" />
-                  </>
-                ) : (
-                  <>
-                    <span>See More ({relatedSearches.length - 4} more keywords)</span>
-                    <GoogleIcon name="expand_more" size={16} color="var(--accent-color)" />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          {(isExpanded ? relatedSearches : relatedSearches.slice(0, KEYWORD_LIMIT)).map((item, idx) => (
+            <a
+              key={idx}
+              href={item.link || `https://www.google.com/search?q=${encodeURIComponent(item.query)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#fafafc',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-color)',
+                padding: '8px 14px',
+                borderRadius: 9999,
+                fontSize: '0.84rem',
+                fontWeight: 500,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent-color)';
+                e.currentTarget.style.background = 'var(--accent-light)';
+                e.currentTarget.style.color = 'var(--accent-color)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.background = '#fafafc';
+                e.currentTarget.style.color = 'var(--text-color)';
+              }}
+            >
+              <GoogleIcon name="search" size={14} color="currentColor" />
+              <span>{item.query}</span>
+            </a>
+          ))}
         </div>
       )}
 
-      {/* Tab 2: People Also Ask (Questions) */}
       {currentTab === 'questions' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {displayedQuestions.map((q, idx) => (
-            <div
-              key={idx}
-              style={{
-                background: '#fafafc',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '10px 12px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span
-                  style={{
-                    background: 'var(--accent-light)',
-                    color: 'var(--accent-color)',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    flexShrink: 0,
-                    marginTop: '1px',
-                  }}
-                >
-                  Q
-                </span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-color)', lineHeight: 1.35 }}>
-                    {q.question}
-                  </div>
-                  {q.snippet && (
-                    <p style={{ fontSize: '0.78rem', color: 'var(--muted-text)', marginTop: '4px', lineHeight: 1.4 }}>
-                      {q.snippet}
-                    </p>
-                  )}
-                  {q.title && q.link && (
-                    <div style={{ marginTop: '4px' }}>
-                      <a
-                        href={q.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: '0.72rem',
-                          color: 'var(--accent-color)',
-                          textDecoration: 'none',
-                        }}
-                      >
-                        Source: {q.title} →
-                      </a>
-                    </div>
-                  )}
-                </div>
+        <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {(isExpanded ? peopleAlsoAsk : peopleAlsoAsk.slice(0, QUESTION_LIMIT)).map((q, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+              <span className="num-badge">Q</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '0.94rem', lineHeight: 1.4, color: 'var(--text-color)' }}>{q.question}</div>
+                {q.snippet && <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', marginTop: 4, lineHeight: 1.5 }}>{q.snippet}</p>}
+                {q.title && q.link && (
+                  <a
+                    href={q.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'inline-block', marginTop: 6, fontSize: '0.78rem', color: 'var(--accent-color)', textDecoration: 'none' }}
+                  >
+                    Source: {q.title} →
+                  </a>
+                )}
               </div>
             </div>
           ))}
-
-          {peopleAlsoAsk.length > 3 && (
-            <div style={{ textAlign: 'center', marginTop: '6px' }}>
-              <button
-                type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'transparent',
-                  color: 'var(--accent-color)',
-                  border: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                }}
-              >
-                {isExpanded ? (
-                  <>
-                    <span>Show Less</span>
-                    <GoogleIcon name="expand_less" size={16} color="var(--accent-color)" />
-                  </>
-                ) : (
-                  <>
-                    <span>See More ({peopleAlsoAsk.length - 3} more questions)</span>
-                    <GoogleIcon name="expand_more" size={16} color="var(--accent-color)" />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
         </div>
       )}
-    </div>
+
+      {total > limit && (
+        <div style={{ marginTop: '20px' }}>
+          <button type="button" className="link-btn" onClick={() => setIsExpanded(!isExpanded)}>
+            <span>{isExpanded ? 'Show less' : `Show ${total - limit} more ${noun}`}</span>
+            <GoogleIcon name={isExpanded ? 'expand_less' : 'expand_more'} size={16} color="currentColor" />
+          </button>
+        </div>
+      )}
+    </SectionCard>
   );
 }

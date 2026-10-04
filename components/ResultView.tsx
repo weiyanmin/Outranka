@@ -1,647 +1,75 @@
-import React from 'react';
-import { AnalysisResult } from '../lib/analyze';
-import AiOverviewCard from './AiOverviewCard';
-import RelatedKeywordsCard from './RelatedKeywordsCard';
-import RankingChanceCard from './RankingChanceCard';
-import LanguageMismatchBanner from './LanguageMismatchBanner';
-import GoogleIcon from './GoogleIcon';
+'use client';
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AnalysisResult } from '../lib/analyze';
+import { SerpResultItem } from '../lib/serp';
 import { calculateOverallPerformance } from '../lib/performanceScore';
+import DashboardShell, { DashboardTab } from './report/DashboardShell';
+import OverviewTab from './report/tabs/OverviewTab';
+import SearchIntentTab from './report/tabs/SearchIntentTab';
+import ContentUxTab from './report/tabs/ContentUxTab';
+import OpportunitiesTab from './report/tabs/OpportunitiesTab';
+import AiLanguageTab from './report/tabs/AiLanguageTab';
+import CompetitorsTab from './report/tabs/CompetitorsTab';
 
 interface ResultViewProps {
   analysis: AnalysisResult;
+  competitors?: SerpResultItem[];
 }
 
-export default function ResultView({ analysis }: ResultViewProps) {
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return '#10b981'; // emerald
-    if (score >= 50) return '#28a79c'; // teal accent
-    return '#f43f5e'; // rose/coral
-  };
+const TAB_IDS = ['overview', 'intent', 'content', 'opportunities', 'ai', 'competitors'] as const;
+type TabId = (typeof TAB_IDS)[number];
 
-  const getIntentBadgeColor = (intent: string) => {
-    switch (intent) {
-      case 'Commercial':
-        return { bg: 'rgba(40, 167, 156, 0.12)', color: '#1a776f', border: 'rgba(40, 167, 156, 0.3)' };
-      case 'Informational':
-        return { bg: 'rgba(2, 132, 199, 0.1)', color: '#0284c7', border: 'rgba(2, 132, 199, 0.25)' };
-      case 'Transactional':
-        return { bg: 'rgba(234, 88, 12, 0.1)', color: '#c2410c', border: 'rgba(234, 88, 12, 0.25)' };
-      case 'Navigational':
-      default:
-        return { bg: 'rgba(100, 116, 139, 0.1)', color: '#475569', border: 'rgba(100, 116, 139, 0.2)' };
+function isTabId(value: string): value is TabId {
+  return (TAB_IDS as readonly string[]).includes(value);
+}
+
+export default function ResultView({ analysis, competitors = [] }: ResultViewProps) {
+  const [active, setActive] = useState<TabId>('overview');
+  const topRef = useRef<HTMLDivElement>(null);
+
+  // Restore the tab from the URL hash (e.g. /results#content) after mount
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (isTabId(hash)) setActive(hash);
+  }, []);
+
+  const changeTab = useCallback((id: string) => {
+    if (!isTabId(id)) return;
+    setActive(id);
+    window.history.replaceState(null, '', `#${id}`);
+    // If the user is scrolled past the top of the dashboard, bring it back into view
+    const el = topRef.current;
+    if (el && el.getBoundingClientRect().top < 0) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  };
+  }, []);
 
-  // Derive or use existing overallPerformance report
-  const perfReport =
+  const perf =
     analysis.overallPerformance ||
-    calculateOverallPerformance(
-      analysis,
-      analysis.scannabilityAudit,
-      analysis.languageAudit,
-      analysis.aiOverview
-    );
+    calculateOverallPerformance(analysis, analysis.scannabilityAudit, analysis.languageAudit, analysis.aiOverview);
 
-  const intentStyle = getIntentBadgeColor(analysis.intentCategory);
+  const hasUxAlert = !!analysis.scannabilityAudit?.checks.some((c) => c.status === 'alert');
+
+  const tabs: DashboardTab[] = [
+    { id: 'overview', label: 'Overview', icon: 'bar_chart' },
+    { id: 'intent', label: 'Search Intent', icon: 'track_changes', alert: analysis.intentMismatch },
+    { id: 'content', label: 'Content & UX', icon: 'toc', alert: hasUxAlert },
+    { id: 'opportunities', label: 'Opportunities', icon: 'lightbulb', count: analysis.missingTopics?.length || undefined },
+    { id: 'ai', label: 'AI & Language', icon: 'auto_awesome', alert: !!analysis.languageAudit?.isMismatch },
+    { id: 'competitors', label: 'Competitors', icon: 'search', count: competitors.length || undefined },
+  ];
 
   return (
-    <div>
-      {/* Top Hero Section: Overall Performance Score & Chance of Ranking in Google Side by Side */}
-      <div className="hero-scores-grid">
-        {/* 1. Overall Performance Score Card */}
-        <div
-          className="card"
-          style={{
-            position: 'relative',
-            overflow: 'hidden',
-            margin: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '8px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <GoogleIcon name="bar_chart" size={24} color={getScoreColor(perfReport.overallScore)} />
-              <div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em', margin: 0 }}>
-                  Overall Performance Score
-                </h3>
-                <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>
-                  Multi-metric search performance index
-                </span>
-              </div>
-            </div>
-
-            <span
-              style={{
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                background:
-                  perfReport.grade === 'Excellent'
-                    ? 'rgba(16, 185, 129, 0.1)'
-                    : perfReport.grade === 'Good'
-                    ? 'rgba(40, 167, 156, 0.1)'
-                    : 'rgba(245, 158, 11, 0.1)',
-                color:
-                  perfReport.grade === 'Excellent'
-                    ? '#10b981'
-                    : perfReport.grade === 'Good'
-                    ? 'var(--accent-color)'
-                    : '#f59e0b',
-                border: `1px solid ${
-                  perfReport.grade === 'Excellent'
-                    ? 'rgba(16, 185, 129, 0.25)'
-                    : perfReport.grade === 'Good'
-                    ? 'rgba(40, 167, 156, 0.25)'
-                    : 'rgba(245, 158, 11, 0.25)'
-                }`,
-                padding: '3px 10px',
-                borderRadius: '9999px',
-              }}
-            >
-              {perfReport.grade}
-            </span>
-          </div>
-
-          {/* Main Score Hero */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '20px',
-              padding: '16px 20px',
-              background: 'linear-gradient(135deg, rgba(40, 167, 156, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
-              border: '1px solid rgba(40, 167, 156, 0.2)',
-              borderRadius: 'var(--radius-md)',
-              flexWrap: 'wrap',
-            }}
-          >
-            <div style={{ textAlign: 'center', minWidth: '90px' }}>
-              <div
-                style={{
-                  fontSize: '2.8rem',
-                  fontWeight: 800,
-                  lineHeight: 1,
-                  letterSpacing: '-0.03em',
-                  color: getScoreColor(perfReport.overallScore),
-                }}
-              >
-                {perfReport.overallScore}%
-              </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, textTransform: 'uppercase' }}>
-                Aggregate Index
-              </span>
-            </div>
-
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-color)', lineHeight: 1.45, margin: '0 0 6px 0' }}>
-                {perfReport.summary}
-              </p>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.74rem', color: 'var(--muted-text)', alignItems: 'center' }}>
-                <span>Target Intent: <strong style={{ color: 'var(--text-color)', fontWeight: 600 }}>{analysis.keywordIntent}</strong></span>
-                <span style={{ background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 500 }}>
-                  {analysis.intentCategory}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Algorithmic Pillars Breakdown Grid */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                Algorithmic Pillar Breakdown:
-              </span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '2px 8px', borderRadius: '6px' }}>
-                Weighted Factors
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '10px',
-              }}
-            >
-              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                  Search Intent (35%)
-                </span>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {perfReport.factors.searchIntent.score}%
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                    {perfReport.factors.searchIntent.label}
-                  </span>
-                </div>
-                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
-                  <div style={{ width: `${perfReport.factors.searchIntent.score}%`, height: '100%', background: getScoreColor(perfReport.factors.searchIntent.score), borderRadius: '9999px' }} />
-                </div>
-              </div>
-
-              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                  UI/UX Scannability (25%)
-                </span>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {perfReport.factors.scannabilityUx.score}%
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                    {perfReport.factors.scannabilityUx.label}
-                  </span>
-                </div>
-                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
-                  <div style={{ width: `${perfReport.factors.scannabilityUx.score}%`, height: '100%', background: getScoreColor(perfReport.factors.scannabilityUx.score), borderRadius: '9999px' }} />
-                </div>
-              </div>
-
-              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                  Competitive Parity (25%)
-                </span>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {perfReport.factors.competitiveParity.score}%
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                    {perfReport.factors.competitiveParity.label}
-                  </span>
-                </div>
-                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
-                  <div style={{ width: `${perfReport.factors.competitiveParity.score}%`, height: '100%', background: getScoreColor(perfReport.factors.competitiveParity.score), borderRadius: '9999px' }} />
-                </div>
-              </div>
-
-              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', textAlign: 'left' }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--muted-text)', display: 'block' }}>
-                  Language Match (15%)
-                </span>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '2px' }}>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {perfReport.factors.languageAlignment.score}%
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--muted-text)', fontWeight: 500 }}>
-                    {perfReport.factors.languageAlignment.label}
-                  </span>
-                </div>
-                <div style={{ width: '100%', height: '4px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden', marginTop: '6px' }}>
-                  <div style={{ width: `${perfReport.factors.languageAlignment.score}%`, height: '100%', background: getScoreColor(perfReport.factors.languageAlignment.score), borderRadius: '9999px' }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Chance of Ranking in Google Score Card */}
-        {analysis.rankingChanceReport && (
-          <RankingChanceCard report={analysis.rankingChanceReport} />
-        )}
-      </div>
-
-      {/* Language Alignment & SERP Favoritism Banner */}
-      {analysis.languageAudit && (
-        <LanguageMismatchBanner languageAudit={analysis.languageAudit} />
-      )}
-
-      {/* Intent Mismatch Alert Banner (Full-Width) */}
-      {analysis.intentMismatch && (
-        <div
-          style={{
-            background: '#fffbf0',
-            border: '1px solid rgba(245, 158, 11, 0.25)',
-            borderRadius: 'var(--radius-md)',
-            padding: '16px 20px',
-            marginBottom: '20px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <GoogleIcon name="warning" size={20} color="#b45309" />
-            <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#92400e' }}>
-              Search Intent Mismatch Warning
-            </span>
-          </div>
-          <p style={{ fontSize: '0.88rem', color: '#78350f', lineHeight: 1.45, marginBottom: '10px' }}>
-            {analysis.intentMismatchReason || 'Your page format does not match what Google favors for this keyword.'}
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.8rem' }}>
-            <span style={{ background: '#ffffff', border: '1px solid #fde68a', padding: '4px 10px', borderRadius: '9999px', color: '#92400e' }}>
-              Your Content: <strong>{analysis.userPageType}</strong>
-            </span>
-            <span style={{ background: '#ffffff', border: '1px solid #fde68a', padding: '4px 10px', borderRadius: '9999px', color: '#92400e' }}>
-              Google Prefers: <strong>{analysis.topPagesType} ({analysis.intentCategory})</strong>
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Balanced 2-Column Technical & Competitive Audits Grid */}
-      <div className="results-grid" style={{ marginTop: 0, marginBottom: '20px' }}>
-        {/* Left Column: Deterministic DOM Scannability Check & Content Strengths */}
-        <div className="results-col-primary">
-          {/* Deterministic UI, UX & Scannability Check */}
-          {analysis.scannabilityAudit && (
-            <div className="card" style={{ margin: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <GoogleIcon name="bolt" size={20} color="var(--accent-color)" />
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
-                    UI, UX &amp; Scannability Deterministic Check
-                  </h3>
-                </div>
-                <span
-                  style={{
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    background: 'rgba(40, 167, 156, 0.1)',
-                    color: 'var(--accent-color)',
-                    border: '1px solid rgba(40, 167, 156, 0.25)',
-                    padding: '3px 9px',
-                    borderRadius: '9999px',
-                  }}
-                >
-                  Code &amp; DOM Audit
-                </span>
-              </div>
-
-              <p style={{ fontSize: '0.84rem', color: 'var(--muted-text)', marginBottom: '16px', lineHeight: 1.45 }}>
-                Deterministic measurements of your heading hierarchy, visual media diversity, table of contents, and scanning anchors compared against the top 10 competitors:
-              </p>
-
-              {/* Quick Metrics Bar */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-                  gap: '8px',
-                  marginBottom: '16px',
-                }}
-              >
-                <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>H1 / H2</span>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {analysis.scannabilityAudit.userMetrics.h1Count} / {analysis.scannabilityAudit.userMetrics.h2Count}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
-                    Top Avg: {analysis.scannabilityAudit.topCompetitorAverages.avgH2Count} H2
-                  </span>
-                </div>
-
-                <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>Images</span>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {analysis.scannabilityAudit.userMetrics.imageCount}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
-                    Top Avg: {analysis.scannabilityAudit.topCompetitorAverages.avgImageCount}
-                  </span>
-                </div>
-
-                <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>Videos</span>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
-                    {analysis.scannabilityAudit.userMetrics.videoCount}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
-                    Top Avg: {analysis.scannabilityAudit.topCompetitorAverages.avgVideoCount}
-                  </span>
-                </div>
-
-                <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>Table of Contents</span>
-                  <span
-                    style={{
-                      fontSize: '1rem',
-                      fontWeight: 700,
-                      color: analysis.scannabilityAudit.userMetrics.hasTableOfContents ? '#10b981' : '#f59e0b',
-                      display: 'block',
-                      marginTop: '2px',
-                    }}
-                  >
-                    {analysis.scannabilityAudit.userMetrics.hasTableOfContents ? 'Yes' : 'No'}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
-                    {analysis.scannabilityAudit.topCompetitorAverages.tocAdoptionRate}% adoption
-                  </span>
-                </div>
-              </div>
-
-              {/* Deterministic Rules & Check Results */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {analysis.scannabilityAudit.checks.map((chk) => {
-                  const isPass = chk.status === 'pass';
-                  const isWarn = chk.status === 'warning';
-                  const statusColor = isPass ? '#10b981' : isWarn ? '#f59e0b' : '#ef4444';
-                  const statusBg = isPass ? 'rgba(16, 185, 129, 0.08)' : isWarn ? 'rgba(245, 158, 11, 0.08)' : 'rgba(239, 68, 68, 0.08)';
-                  const statusBorder = isPass ? 'rgba(16, 185, 129, 0.25)' : isWarn ? 'rgba(245, 158, 11, 0.25)' : 'rgba(239, 68, 68, 0.25)';
-
-                  return (
-                    <div
-                      key={chk.id}
-                      style={{
-                        padding: '12px 14px',
-                        background: statusBg,
-                        border: `1px solid ${statusBorder}`,
-                        borderRadius: 'var(--radius-md)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-color)' }}>
-                          {chk.label}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            color: statusColor,
-                            background: '#ffffff',
-                            padding: '2px 8px',
-                            borderRadius: '9999px',
-                            border: `1px solid ${statusBorder}`,
-                          }}
-                        >
-                          {chk.status}
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '16px', fontSize: '0.78rem', color: 'var(--muted-text)', marginTop: '2px' }}>
-                        <span>You: <strong style={{ color: 'var(--text-color)' }}>{chk.userValue}</strong></span>
-                        <span>Benchmark: <strong style={{ color: 'var(--text-color)' }}>{chk.competitorBenchmark}</strong></span>
-                      </div>
-
-                      <p style={{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: 0.9, lineHeight: 1.4, marginTop: '2px' }}>
-                        {chk.guidance}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Content Strengths */}
-          {analysis.strengths && analysis.strengths.length > 0 && (
-            <div className="card" style={{ margin: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <GoogleIcon name="check_circle" size={20} color="#16a34a" />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>
-                  What Your Content Does Well
-                </h3>
-              </div>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {analysis.strengths.map((str, i) => (
-                  <li key={i} style={{ fontSize: '0.9rem', color: '#16a34a', lineHeight: 1.45 }}>
-                    <span style={{ color: 'var(--text-color)' }}>{str}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: AI Overview & Citations + Priority Recommendations */}
-        <div className="results-col-secondary">
-          {/* Google AI Overview & Citations Donut Graph */}
-          <AiOverviewCard aiOverview={analysis.aiOverview} />
-
-          {/* Priority Recommendations */}
-          {analysis.topRecommendations && analysis.topRecommendations.length > 0 && (
-            <div className="card" style={{ margin: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <GoogleIcon name="bolt" size={20} color="var(--accent-color)" />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>
-                  Priority Recommendations to Outrank
-                </h3>
-              </div>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {analysis.topRecommendations.map((rec, i) => (
-                  <li key={i} style={{ fontSize: '0.9rem', color: 'var(--text-color)', lineHeight: 1.45 }}>
-                    {rec}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Row 4: Side by Side Cards — Missing Topics & Suggested Content Structure */}
-      {analysis.missingTopics && analysis.missingTopics.length > 0 && (
-        <div className="hero-scores-grid" style={{ marginBottom: '20px' }}>
-          {/* Top 3 Missing Topics Card */}
-          <div className="card" style={{ margin: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <GoogleIcon name="lightbulb" size={20} color="var(--accent-color)" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
-                Top 3 Topics You Are Missing
-              </h3>
-            </div>
-            <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginBottom: '16px' }}>
-              Key subtopics covered by top competitors that your content lacks:
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {analysis.missingTopics.map((topic, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '14px',
-                    background: '#fafafc',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                  }}
-                >
-                  <span
-                    style={{
-                      background: 'var(--accent-color)',
-                      color: '#ffffff',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      width: '22px',
-                      height: '22px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      marginTop: '1px',
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-                  <p style={{ fontSize: '0.92rem', color: 'var(--text-color)', fontWeight: 500, lineHeight: 1.45 }}>
-                    {topic}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggested Content Structure Card */}
-          {analysis.suggestedStructure && analysis.suggestedStructure.length > 0 ? (
-            <div className="card" style={{ margin: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <GoogleIcon name="toc" size={20} color="var(--accent-color)" />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
-                  Suggested Content Structure
-                </h3>
-              </div>
-              <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginBottom: '16px' }}>
-                Recommended headings hierarchy (H2, H3) aligned with what Google is currently ranking:
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {analysis.suggestedStructure.map((s, i) => {
-                  const tagLevel = s.level || (i % 3 === 2 ? 'H3' : 'H2');
-                  const isH2 = tagLevel === 'H2';
-
-                  return (
-                    <div
-                      key={i}
-                      style={{
-                        padding: '12px 14px',
-                        background: '#fafafc',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: 'var(--radius-md)',
-                        marginLeft: isH2 ? '0px' : '16px',
-                        borderLeft: isH2 ? '3px solid var(--accent-color)' : '3px solid #3b82f6',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                        <span
-                          style={{
-                            fontSize: '0.7rem',
-                            fontWeight: 800,
-                            letterSpacing: '0.04em',
-                            padding: '2px 7px',
-                            borderRadius: '5px',
-                            background: isH2 ? 'rgba(40, 167, 156, 0.12)' : 'rgba(59, 130, 246, 0.12)',
-                            color: isH2 ? 'var(--accent-color)' : '#2563eb',
-                            border: `1px solid ${isH2 ? 'rgba(40, 167, 156, 0.25)' : 'rgba(59, 130, 246, 0.25)'}`,
-                          }}
-                        >
-                          {tagLevel}
-                        </span>
-                        <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-color)' }}>
-                          {s.heading}
-                        </div>
-                      </div>
-                      <p style={{ fontSize: '0.84rem', color: 'var(--muted-text)', lineHeight: 1.45, margin: 0 }}>
-                        {s.description}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div />
-          )}
-        </div>
-      )}
-
-      {/* Row 5: Side by Side Cards — Related Searches & Suggested Schema */}
-      <div className="hero-scores-grid" style={{ marginBottom: '20px' }}>
-        {/* Google Related Searches & People Also Ask */}
-        <RelatedKeywordsCard
-          relatedSearches={analysis.relatedSearches}
-          peopleAlsoAsk={analysis.peopleAlsoAsk}
-        />
-
-        {/* Suggested Schema Markup */}
-        {analysis.suggestedSchema && analysis.suggestedSchema.length > 0 ? (
-          <div className="card" style={{ margin: 0 }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', marginBottom: '4px' }}>
-              Suggested Schema Markup
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: 'var(--muted-text)', marginBottom: '14px' }}>
-              Structured data types detected on top-performing competitor pages:
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {analysis.suggestedSchema.map((sch, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: '#fafafc',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '8px 12px',
-                    fontSize: '0.82rem',
-                  }}
-                >
-                  <strong style={{ color: 'var(--text-color)' }}>{sch.type}: </strong>
-                  <span style={{ color: 'var(--muted-text)' }}>{sch.reason}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div />
-        )}
-      </div>
+    <div ref={topRef} style={{ scrollMarginTop: '16px' }}>
+      <DashboardShell tabs={tabs} active={active} onChange={changeTab}>
+        {active === 'overview' && <OverviewTab analysis={analysis} perf={perf} onNavigate={changeTab} />}
+        {active === 'intent' && <SearchIntentTab analysis={analysis} />}
+        {active === 'content' && <ContentUxTab analysis={analysis} />}
+        {active === 'opportunities' && <OpportunitiesTab analysis={analysis} />}
+        {active === 'ai' && <AiLanguageTab analysis={analysis} />}
+        {active === 'competitors' && <CompetitorsTab analysis={analysis} competitors={competitors} />}
+      </DashboardShell>
     </div>
   );
 }

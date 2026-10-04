@@ -1,434 +1,123 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SerpResultItem, GoogleAiOverviewData } from '../lib/serp';
 import { CompetitorIntentInfo } from '../lib/analyze';
 import { SearchIntentCategory } from '../lib/scoring';
 import GoogleIcon from './GoogleIcon';
+import SectionCard from './report/SectionCard';
+import Pill, { Tone } from './report/Pill';
 
 interface CompetitorListProps {
   competitors: SerpResultItem[];
   competitorIntents?: CompetitorIntentInfo[];
   aiOverview?: GoogleAiOverviewData;
+  span?: 3 | 4 | 5 | 6 | 7 | 8 | 12;
 }
 
-export default function CompetitorList({ competitors, competitorIntents, aiOverview }: CompetitorListProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+const INTENT_TONE: Record<SearchIntentCategory, Tone> = {
+  Commercial: 'accent',
+  Informational: 'info',
+  Transactional: 'warning',
+  Navigational: 'neutral',
+};
 
-  if (!competitors || competitors.length === 0) {
-    return null;
-  }
+export default function CompetitorList({ competitors, competitorIntents, aiOverview, span = 12 }: CompetitorListProps) {
+  if (!competitors || competitors.length === 0) return null;
 
-  const getIntentCategory = (position: number, url: string): SearchIntentCategory | null => {
-    if (!competitorIntents) return null;
-    const match = competitorIntents.find((ci) => ci.rank === position || ci.url === url);
+  const getIntent = (position: number, url: string): SearchIntentCategory | null => {
+    const match = competitorIntents?.find((ci) => ci.rank === position || ci.url === url);
     return match ? match.intentCategory : null;
   };
 
-  const getIntentBadgeStyle = (intent: SearchIntentCategory) => {
-    switch (intent) {
-      case 'Commercial':
-        return {
-          bg: 'rgba(40, 167, 156, 0.12)',
-          color: '#1a776f',
-          border: 'rgba(40, 167, 156, 0.3)',
-        };
-      case 'Informational':
-        return {
-          bg: 'rgba(2, 132, 199, 0.1)',
-          color: '#0284c7',
-          border: 'rgba(2, 132, 199, 0.25)',
-        };
-      case 'Transactional':
-        return {
-          bg: 'rgba(234, 88, 12, 0.1)',
-          color: '#c2410c',
-          border: 'rgba(234, 88, 12, 0.25)',
-        };
-      case 'Navigational':
-      default:
-        return {
-          bg: 'rgba(100, 116, 139, 0.1)',
-          color: '#475569',
-          border: 'rgba(100, 116, 139, 0.2)',
-        };
-    }
-  };
-
-  const displayedCompetitors = isExpanded ? competitors : competitors.slice(0, 3);
-  const remainingCount = Math.max(0, competitors.length - 3);
+  const isCitedByAi = (item: SerpResultItem) =>
+    !!aiOverview?.triggered &&
+    aiOverview.references.some(
+      (ref) =>
+        ref.matchesCompetitorRank === item.position ||
+        ref.link === item.link ||
+        (item.link && ref.domain && item.link.includes(ref.domain))
+    );
 
   return (
-    <div style={{ marginTop: '28px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', padding: '0 4px' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
-          Top {isExpanded ? competitors.length : '3'} Competitors
-        </h3>
-        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-text)', background: 'var(--segmented-bg)', padding: '3px 8px', borderRadius: '6px' }}>
-          Showing {displayedCompetitors.length} of {competitors.length}
-        </span>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {displayedCompetitors.map((item) => {
-          const intent = getIntentCategory(item.position, item.link);
-          const badgeStyle = intent ? getIntentBadgeStyle(intent) : null;
+    <SectionCard
+      title={`Top ${competitors.length} Competitors`}
+      subtitle="The pages Google currently ranks for your keyword"
+      span={span}
+    >
+      <div className="divided" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+        {competitors.map((item, idx) => {
+          const intent = getIntent(item.position, item.link);
+          const m = item.metrics;
+          const stats = m
+            ? [
+                `${m.h2Count} H2`,
+                `${m.imageCount} ${m.imageCount === 1 ? 'image' : 'images'}`,
+                `${m.videoCount} ${m.videoCount === 1 ? 'video' : 'videos'}`,
+                m.hasTableOfContents ? 'Table of contents' : 'No table of contents',
+              ]
+            : [];
 
           return (
             <div
               key={item.position + item.link}
-              className="card"
-              style={{
-                padding: '16px 18px',
-                borderRadius: 'var(--radius-md)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
-              }}
+              style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', paddingTop: idx === 0 ? 0 : 22 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    background: item.position <= 3 ? 'var(--accent-color)' : 'var(--segmented-bg)',
-                    color: item.position <= 3 ? '#ffffff' : 'var(--text-color)',
-                    padding: '2px 7px',
-                    borderRadius: '6px',
-                    flexShrink: 0,
-                  }}
-                >
-                  #{item.position}
-                </span>
+              <span
+                className="num-badge"
+                style={item.position <= 3 ? { background: 'var(--accent-color)', color: '#fff' } : { background: 'var(--segmented-bg)', color: 'var(--text-color)' }}
+              >
+                {item.position}
+              </span>
 
-                {intent && badgeStyle && (
-                  <span
-                    style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.04em',
-                      background: badgeStyle.bg,
-                      color: badgeStyle.color,
-                      border: `1px solid ${badgeStyle.border}`,
-                      padding: '2px 7px',
-                      borderRadius: '9999px',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {intent} Intent
-                  </span>
-                )}
-
-                {/* AI Overview Citation Badge */}
-                {aiOverview?.triggered &&
-                  aiOverview.references.some(
-                    (ref) =>
-                      ref.matchesCompetitorRank === item.position ||
-                      ref.link === item.link ||
-                      (item.link && ref.domain && item.link.includes(ref.domain))
-                  ) && (
-                    <span
-                      style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        background: 'linear-gradient(135deg, rgba(40, 167, 156, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)',
-                        color: 'var(--accent-color)',
-                        border: '1px solid rgba(40, 167, 156, 0.35)',
-                        padding: '2px 8px',
-                        borderRadius: '9999px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <GoogleIcon name="auto_awesome" size={13} color="var(--accent-color)" />
-                      <span>Cited in AI Overview</span>
-                    </span>
-                  )}
-
-                {/* Detected Page Language Badge */}
-                {item.language && (
-                  <span
-                    style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 600,
-                      background: 'var(--card-bg)',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--muted-text)',
-                      padding: '2px 7px',
-                      borderRadius: '9999px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <GoogleIcon name="language" size={13} color="var(--muted-text)" />
-                    <span>{item.language.name}</span>
-                  </span>
-                )}
-              </div>
-
-              <div style={{ marginBottom: '4px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <a
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    fontWeight: 600,
-                    color: 'var(--text-color)',
-                    textDecoration: 'none',
-                    fontSize: '0.95rem',
-                    lineHeight: 1.35,
-                  }}
+                  style={{ fontWeight: 600, fontSize: '0.98rem', lineHeight: 1.4, color: 'var(--text-color)', textDecoration: 'none' }}
                   onMouseOver={(e) => (e.currentTarget.style.color = 'var(--accent-color)')}
                   onMouseOut={(e) => (e.currentTarget.style.color = 'var(--text-color)')}
                 >
                   {item.title}
                 </a>
-              </div>
-              
-              <p
-                style={{
-                  fontSize: '0.75rem',
-                  color: 'var(--muted-text)',
-                  wordBreak: 'break-all',
-                  marginBottom: '8px',
-                }}
-              >
-                {item.link}
-              </p>
-
-              {item.snippet && (
-                <p
-                  style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--text-color)',
-                    lineHeight: 1.45,
-                    opacity: 0.9,
-                    marginBottom: '10px',
-                  }}
-                >
-                  {item.snippet}
-                </p>
-              )}
-
-              {/* Competitor Structural & Media Assets Metrics */}
-              {item.metrics && (
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    flexWrap: 'wrap',
-                    paddingTop: '8px',
-                    borderTop: '1px solid var(--border-color)',
-                    marginTop: '8px',
-                  }}
+                  style={{ fontSize: '0.78rem', color: 'var(--muted-text)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                 >
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: 'var(--muted-text)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      marginRight: '2px',
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="3" y1="9" x2="21" y2="9"></line>
-                      <line x1="9" y1="21" x2="9" y2="9"></line>
-                    </svg>
-                    Assets:
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: 'var(--text-color)',
-                      background: 'var(--card-bg)',
-                      border: '1px solid var(--border-color)',
-                      padding: '2px 7px',
-                      borderRadius: '6px',
-                    }}
-                  >
-                    {item.metrics.h1Count} H1 • {item.metrics.h2Count} H2
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: item.metrics.imageCount > 0 ? 'var(--text-color)' : 'var(--muted-text)',
-                      background: 'var(--card-bg)',
-                      border: '1px solid var(--border-color)',
-                      padding: '2px 7px',
-                      borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    <GoogleIcon name="image" size={13} color="currentColor" />
-                    <span>{item.metrics.imageCount} {item.metrics.imageCount === 1 ? 'img' : 'imgs'}</span>
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: item.metrics.videoCount > 0 ? '#1a776f' : 'var(--muted-text)',
-                      background: item.metrics.videoCount > 0 ? 'rgba(40, 167, 156, 0.1)' : 'var(--card-bg)',
-                      border: item.metrics.videoCount > 0 ? '1px solid rgba(40, 167, 156, 0.3)' : '1px solid var(--border-color)',
-                      padding: '2px 7px',
-                      borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    <GoogleIcon name="videocam" size={13} color="currentColor" />
-                    <span>{item.metrics.videoCount} {item.metrics.videoCount === 1 ? 'vid' : 'vids'}</span>
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: item.metrics.hasTableOfContents ? '#16a34a' : 'var(--muted-text)',
-                      background: item.metrics.hasTableOfContents ? 'rgba(22, 163, 74, 0.08)' : 'var(--card-bg)',
-                      border: item.metrics.hasTableOfContents ? '1px solid rgba(22, 163, 74, 0.25)' : '1px solid var(--border-color)',
-                      padding: '2px 7px',
-                      borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    <GoogleIcon name="toc" size={13} color="currentColor" />
-                    <span>{item.metrics.hasTableOfContents ? 'TOC' : 'No TOC'}</span>
-                  </span>
+                  {item.link}
                 </div>
-              )}
 
-              {/* Competitor Schema Types */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  flexWrap: 'wrap',
-                  paddingTop: '6px',
-                  borderTop: item.metrics ? 'none' : '1px solid var(--border-color)',
-                  marginTop: '4px',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    color: 'var(--muted-text)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    marginRight: '2px',
-                  }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
-                  </svg>
-                  Schema:
-                </span>
+                {item.snippet && (
+                  <p style={{ fontSize: '0.86rem', color: 'var(--text-color)', opacity: 0.85, lineHeight: 1.5, marginTop: 8 }}>{item.snippet}</p>
+                )}
 
-                {item.schemaTypes && item.schemaTypes.length > 0 ? (
-                  item.schemaTypes.map((st, sIdx) => (
-                    <span
-                      key={sIdx}
-                      style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 600,
-                        fontFamily: 'monospace',
-                        color: 'var(--accent-color)',
-                        background: 'var(--accent-light)',
-                        border: '1px solid rgba(40, 167, 156, 0.25)',
-                        padding: '2px 7px',
-                        borderRadius: '6px',
-                        letterSpacing: '-0.01em',
-                      }}
-                    >
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: 12 }}>
+                  {intent && <Pill tone={INTENT_TONE[intent]}>{intent}</Pill>}
+                  {isCitedByAi(item) && <Pill tone="accent">Cited in AI Overview</Pill>}
+                  {item.language && <Pill tone="neutral">{item.language.name}</Pill>}
+                  {item.schemaTypes?.map((st) => (
+                    <Pill key={st} tone="neutral">
                       {st}
-                    </span>
-                  ))
-                ) : (
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontStyle: 'italic',
-                      color: 'var(--muted-text)',
-                      opacity: 0.8,
-                    }}
-                  >
-                    No structured schema detected
-                  </span>
+                    </Pill>
+                  ))}
+                </div>
+
+                {stats.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 12, fontSize: '0.8rem', color: 'var(--muted-text)' }}>
+                    <GoogleIcon name="bar_chart" size={14} color="currentColor" />
+                    {stats.map((s, i) => (
+                      <React.Fragment key={s}>
+                        {i > 0 && <span>·</span>}
+                        <span>{s}</span>
+                      </React.Fragment>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
           );
         })}
       </div>
-
-      {competitors.length > 3 && (
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: '#ffffff',
-              color: 'var(--accent-color)',
-              border: '1px solid var(--border-color)',
-              padding: '10px 20px',
-              borderRadius: '9999px',
-              fontSize: '0.88rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = 'var(--accent-color)';
-              e.currentTarget.style.background = 'var(--accent-light)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border-color)';
-              e.currentTarget.style.background = '#ffffff';
-            }}
-          >
-            {isExpanded ? (
-              <>
-                Show Less
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="18 15 12 9 6 15"></polyline>
-                </svg>
-              </>
-            ) : (
-              <>
-                See More ({remainingCount} more competitors)
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-    </div>
+    </SectionCard>
   );
 }
