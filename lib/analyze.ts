@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { PageContent } from './readPage';
-import { SerpResultItem, GoogleAiOverviewData } from './serp';
+import { SerpResultItem, GoogleAiOverviewData, RelatedSearchItem, PeopleAlsoAskItem } from './serp';
 import { SCORING_RULES_DESCRIPTION, SearchIntentCategory } from './scoring';
 import { DeterministicAuditSummary } from './scannability';
 
@@ -39,6 +39,8 @@ export interface AnalysisResult {
   competitorsAnalyzedCount: number;
   scannabilityAudit?: DeterministicAuditSummary;
   aiOverview?: GoogleAiOverviewData;
+  relatedSearches?: RelatedSearchItem[];
+  peopleAlsoAsk?: PeopleAlsoAskItem[];
 }
 
 export async function analyzeContentWithGemini(

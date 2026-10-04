@@ -26,9 +26,23 @@ export interface GoogleAiOverviewData {
   organicCompetitorOverlapCount: number; // How many top 10 competitors are cited
 }
 
+export interface RelatedSearchItem {
+  query: string;
+  link?: string;
+}
+
+export interface PeopleAlsoAskItem {
+  question: string;
+  snippet?: string;
+  title?: string;
+  link?: string;
+}
+
 export interface SerpFetchResult {
   competitors: SerpResultItem[];
   aiOverview: GoogleAiOverviewData;
+  relatedSearches: RelatedSearchItem[];
+  peopleAlsoAsk: PeopleAlsoAskItem[];
 }
 
 export async function fetchTop10Results(keyword: string, location: string): Promise<SerpFetchResult> {
@@ -171,9 +185,27 @@ export async function fetchTop10Results(keyword: string, location: string): Prom
     organicCompetitorOverlapCount,
   };
 
+  // Extract Related Searches / Keywords
+  const rawRelatedSearches: any[] = data.related_searches || [];
+  const relatedSearches: RelatedSearchItem[] = rawRelatedSearches.map((item) => ({
+    query: item.query || '',
+    link: item.link || '',
+  })).filter((item) => Boolean(item.query));
+
+  // Extract "People Also Ask" (Related Questions)
+  const rawRelatedQuestions: any[] = data.related_questions || [];
+  const peopleAlsoAsk: PeopleAlsoAskItem[] = rawRelatedQuestions.map((q) => ({
+    question: q.question || '',
+    snippet: q.snippet || '',
+    title: q.title || '',
+    link: q.link || '',
+  })).filter((q) => Boolean(q.question));
+
   return {
     competitors,
     aiOverview,
+    relatedSearches,
+    peopleAlsoAsk,
   };
 }
 

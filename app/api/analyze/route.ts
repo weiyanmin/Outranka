@@ -112,6 +112,8 @@ export async function POST(req: NextRequest) {
     const scannabilityAudit = evaluateScannabilityAndStructure(userMetrics, competitorMetricsList);
     analysis.scannabilityAudit = scannabilityAudit;
     analysis.aiOverview = aiOverview;
+    analysis.relatedSearches = serpData.relatedSearches || [];
+    analysis.peopleAlsoAsk = serpData.peopleAlsoAsk || [];
 
     // Merge extracted schema types & structural metrics back into the competitor items
     const enrichedCompetitors = competitorPages.map((cp) => ({
@@ -125,6 +127,8 @@ export async function POST(req: NextRequest) {
       competitors: enrichedCompetitors,
       analysis,
       aiOverview,
+      relatedSearches: serpData.relatedSearches || [],
+      peopleAlsoAsk: serpData.peopleAlsoAsk || [],
     });
   } catch (error: any) {
     return NextResponse.json(

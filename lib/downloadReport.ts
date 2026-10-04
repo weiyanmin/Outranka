@@ -73,6 +73,20 @@ ${analysis.aiOverview.references.map((r, i) => `${i + 1}. [${r.domain || r.sourc
 ` : ''}
 ` : ''}
 
+${analysis.relatedSearches && analysis.relatedSearches.length > 0 ? `
+---
+
+## Google Suggested Related Searches
+${analysis.relatedSearches.map((item) => `- ${item.query}`).join('\n')}
+` : ''}
+
+${analysis.peopleAlsoAsk && analysis.peopleAlsoAsk.length > 0 ? `
+---
+
+## Google "People Also Ask" Questions
+${analysis.peopleAlsoAsk.map((q) => `### ${q.question}\n${q.snippet ? `${q.snippet}\n` : ''}${q.link ? `Source: ${q.link}\n` : ''}`).join('\n')}
+` : ''}
+
 ---
 
 ## Top 10 Google Competitors Analyzed
@@ -482,6 +496,31 @@ export function downloadAnalysisPdf(
         `).join('')}
       </div>
     ` : ''}
+  </div>
+  ` : ''}
+
+  ${analysis.relatedSearches && analysis.relatedSearches.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Google Suggested Related Searches</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+      ${analysis.relatedSearches.map(item => `
+        <span class="badge" style="font-size: 9px; padding: 4px 8px;">${item.query}</span>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+
+  ${analysis.peopleAlsoAsk && analysis.peopleAlsoAsk.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Google &ldquo;People Also Ask&rdquo; High-Intent Questions</div>
+    <div class="rec-list">
+      ${analysis.peopleAlsoAsk.map(q => `
+        <div class="rec-item">
+          <strong>${q.question}</strong>
+          ${q.snippet ? `<div style="color: #64748b; font-size: 9px; margin-top: 2px;">${q.snippet}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
   </div>
   ` : ''}
 

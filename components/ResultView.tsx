@@ -1,6 +1,7 @@
 import React from 'react';
 import { AnalysisResult } from '../lib/analyze';
 import AiOverviewCard from './AiOverviewCard';
+import RelatedKeywordsCard from './RelatedKeywordsCard';
 
 interface ResultViewProps {
   analysis: AnalysisResult;
@@ -410,6 +411,12 @@ export default function ResultView({ analysis }: ResultViewProps) {
             </ul>
           </div>
         )}
+
+        {/* Google Related Searches & People Also Ask */}
+        <RelatedKeywordsCard
+          relatedSearches={analysis.relatedSearches}
+          peopleAlsoAsk={analysis.peopleAlsoAsk}
+        />
 
         {/* 6. Suggested Schema Markup */}
         {analysis.suggestedSchema && analysis.suggestedSchema.length > 0 && (
