@@ -82,9 +82,15 @@ export async function POST(req: NextRequest) {
       competitorPages
     );
 
+    // Merge extracted schema types back into the competitor items
+    const enrichedCompetitors = competitorPages.map((cp) => ({
+      ...cp.serp,
+      schemaTypes: cp.content.schemaTypes || [],
+    }));
+
     return NextResponse.json({
       success: true,
-      competitors,
+      competitors: enrichedCompetitors,
       analysis,
     });
   } catch (error: any) {

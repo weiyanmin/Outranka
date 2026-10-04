@@ -3,6 +3,7 @@ export interface SerpResultItem {
   title: string;
   link: string;
   snippet: string;
+  schemaTypes?: string[];
 }
 
 export async function fetchTop10Results(keyword: string, location: string): Promise<SerpResultItem[]> {

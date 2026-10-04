@@ -154,11 +154,75 @@ export default function CompetitorList({ competitors, competitorIntents }: Compe
                     color: 'var(--text-color)',
                     lineHeight: 1.45,
                     opacity: 0.9,
+                    marginBottom: '10px',
                   }}
                 >
                   {item.snippet}
                 </p>
               )}
+
+              {/* Competitor Schema Types */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  flexWrap: 'wrap',
+                  paddingTop: '8px',
+                  borderTop: '1px solid var(--border-color)',
+                  marginTop: '4px',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    color: 'var(--muted-text)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    marginRight: '2px',
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                  Schema:
+                </span>
+
+                {item.schemaTypes && item.schemaTypes.length > 0 ? (
+                  item.schemaTypes.map((st, sIdx) => (
+                    <span
+                      key={sIdx}
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        fontFamily: 'monospace',
+                        color: 'var(--accent-color)',
+                        background: 'var(--accent-light)',
+                        border: '1px solid rgba(40, 167, 156, 0.25)',
+                        padding: '2px 7px',
+                        borderRadius: '6px',
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
+                      {st}
+                    </span>
+                  ))
+                ) : (
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontStyle: 'italic',
+                      color: 'var(--muted-text)',
+                      opacity: 0.8,
+                    }}
+                  >
+                    No structured schema detected
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
