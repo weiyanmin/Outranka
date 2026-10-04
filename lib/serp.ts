@@ -1,9 +1,12 @@
+import { StructuralAssetsMetrics } from './scannability';
+
 export interface SerpResultItem {
   position: number;
   title: string;
   link: string;
   snippet: string;
   schemaTypes?: string[];
+  metrics?: StructuralAssetsMetrics;
 }
 
 export async function fetchTop10Results(keyword: string, location: string): Promise<SerpResultItem[]> {

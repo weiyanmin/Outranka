@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { StructuralAssetsMetrics, analyzeHtmlStructureAndAssets } from './scannability';
 
 export interface PageContent {
   url: string;
@@ -6,9 +7,25 @@ export interface PageContent {
   headings: string[];
   textExcerpt: string;
   schemaTypes: string[];
+  metrics: StructuralAssetsMetrics;
   success: boolean;
   error?: string;
 }
+
+const defaultMetrics: StructuralAssetsMetrics = {
+  h1Count: 0,
+  h2Count: 0,
+  h3Count: 0,
+  headingsList: [],
+  imageCount: 0,
+  videoCount: 0,
+  hasTableOfContents: false,
+  bulletListCount: 0,
+  boldEmphasisCount: 0,
+  tableCount: 0,
+  wordCount: 0,
+  estimatedReadingTimeMin: 1,
+};
 
 export async function readWebPage(url: string, isUserUrl: boolean = false): Promise<PageContent> {
   try {
@@ -36,6 +53,7 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
         headings: [],
         textExcerpt: '',
         schemaTypes: [],
+        metrics: defaultMetrics,
         success: false,
         error: `HTTP ${response.status}`,
       };
@@ -44,10 +62,8 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Remove scripts, styles, svgs, and nav elements to clean up text
-    $('script, style, noscript, svg, nav, footer, header').remove();
-
-    const title = $('title').text().trim() || '';
+    // Compute deterministic UI, UX, and asset metrics before stripping tags
+    const metrics = analyzeHtmlStructureAndAssets(html, $);
 
     // Extract headings
     const headings: string[] = [];
@@ -90,6 +106,11 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
       }
     });
 
+    const title = $('title').text().trim() || '';
+
+    // Remove scripts, styles, svgs, and nav elements to clean up text
+    $('script, style, noscript, svg, nav, footer, header').remove();
+
     // Extract clean body text (limit to 3000 chars for prompt efficiency)
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
     const textExcerpt = bodyText.slice(0, 3000);
@@ -100,6 +121,7 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
       headings: headings.slice(0, 15),
       textExcerpt,
       schemaTypes,
+      metrics,
       success: true,
     };
   } catch (err: any) {
@@ -112,6 +134,7 @@ export async function readWebPage(url: string, isUserUrl: boolean = false): Prom
       headings: [],
       textExcerpt: '',
       schemaTypes: [],
+      metrics: defaultMetrics,
       success: false,
       error: err.name === 'AbortError' ? 'Timeout' : err.message,
     };

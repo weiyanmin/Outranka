@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { PageContent } from './readPage';
 import { SerpResultItem } from './serp';
 import { SCORING_RULES_DESCRIPTION, SearchIntentCategory } from './scoring';
+import { DeterministicAuditSummary } from './scannability';
 
 export interface CompetitorIntentInfo {
   rank: number;
@@ -36,6 +37,7 @@ export interface AnalysisResult {
   }[];
   competitorIntents: CompetitorIntentInfo[];
   competitorsAnalyzedCount: number;
+  scannabilityAudit?: DeterministicAuditSummary;
 }
 
 export async function analyzeContentWithGemini(

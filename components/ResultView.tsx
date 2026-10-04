@@ -158,7 +158,153 @@ export default function ResultView({ analysis }: ResultViewProps) {
           </div>
         )}
 
-        {/* 3. Top 3 Missing Topics Card */}
+        {/* 3. Deterministic UI, UX & Scannability Check */}
+        {analysis.scannabilityAudit && (
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'var(--accent-color)', fontSize: '1.2rem' }}>⚡</span>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-color)', letterSpacing: '-0.01em' }}>
+                  UI, UX &amp; Scannability Deterministic Check
+                </h3>
+              </div>
+              <span
+                style={{
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  background: 'rgba(40, 167, 156, 0.1)',
+                  color: 'var(--accent-color)',
+                  border: '1px solid rgba(40, 167, 156, 0.25)',
+                  padding: '3px 9px',
+                  borderRadius: '9999px',
+                }}
+              >
+                Code &amp; DOM Audit
+              </span>
+            </div>
+
+            <p style={{ fontSize: '0.84rem', color: 'var(--muted-text)', marginBottom: '16px', lineHeight: 1.45 }}>
+              Deterministic measurements of your heading hierarchy, visual media diversity, table of contents, and scanning anchors compared against the top 10 competitors:
+            </p>
+
+            {/* Quick Metrics Bar */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+                gap: '8px',
+                marginBottom: '16px',
+              }}
+            >
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>H1 / H2</span>
+                <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                  {analysis.scannabilityAudit.userMetrics.h1Count} / {analysis.scannabilityAudit.userMetrics.h2Count}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
+                  Top Avg: {analysis.scannabilityAudit.topCompetitorAverages.avgH2Count} H2
+                </span>
+              </div>
+
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>Images</span>
+                <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                  {analysis.scannabilityAudit.userMetrics.imageCount}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
+                  Top Avg: {analysis.scannabilityAudit.topCompetitorAverages.avgImageCount}
+                </span>
+              </div>
+
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>Videos</span>
+                <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                  {analysis.scannabilityAudit.userMetrics.videoCount}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
+                  Top Avg: {analysis.scannabilityAudit.topCompetitorAverages.avgVideoCount}
+                </span>
+              </div>
+
+              <div style={{ background: '#fafafc', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '10px 12px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted-text)', fontWeight: 600, display: 'block', textTransform: 'uppercase' }}>Table of Contents</span>
+                <span
+                  style={{
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: analysis.scannabilityAudit.userMetrics.hasTableOfContents ? '#10b981' : '#f59e0b',
+                    display: 'block',
+                    marginTop: '2px',
+                  }}
+                >
+                  {analysis.scannabilityAudit.userMetrics.hasTableOfContents ? 'Yes' : 'No'}
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'var(--muted-text)', display: 'block', marginTop: '2px' }}>
+                  {analysis.scannabilityAudit.topCompetitorAverages.tocAdoptionRate}% adoption
+                </span>
+              </div>
+            </div>
+
+            {/* Deterministic Rules & Check Results */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {analysis.scannabilityAudit.checks.map((chk) => {
+                const isPass = chk.status === 'pass';
+                const isWarn = chk.status === 'warning';
+                const statusColor = isPass ? '#10b981' : isWarn ? '#f59e0b' : '#ef4444';
+                const statusBg = isPass ? 'rgba(16, 185, 129, 0.08)' : isWarn ? 'rgba(245, 158, 11, 0.08)' : 'rgba(239, 68, 68, 0.08)';
+                const statusBorder = isPass ? 'rgba(16, 185, 129, 0.25)' : isWarn ? 'rgba(245, 158, 11, 0.25)' : 'rgba(239, 68, 68, 0.25)';
+
+                return (
+                  <div
+                    key={chk.id}
+                    style={{
+                      padding: '12px 14px',
+                      background: statusBg,
+                      border: `1px solid ${statusBorder}`,
+                      borderRadius: 'var(--radius-md)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-color)' }}>
+                        {chk.label}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          color: statusColor,
+                          background: '#ffffff',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          border: `1px solid ${statusBorder}`,
+                        }}
+                      >
+                        {chk.status}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.78rem', color: 'var(--muted-text)', marginTop: '2px' }}>
+                      <span>You: <strong style={{ color: 'var(--text-color)' }}>{chk.userValue}</strong></span>
+                      <span>Benchmark: <strong style={{ color: 'var(--text-color)' }}>{chk.competitorBenchmark}</strong></span>
+                    </div>
+
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: 0.9, lineHeight: 1.4, marginTop: '2px' }}>
+                      {chk.guidance}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 4. Top 3 Missing Topics Card */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <span style={{ color: 'var(--accent-color)', fontSize: '1.1rem' }}>✦</span>

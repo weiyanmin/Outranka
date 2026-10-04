@@ -161,6 +161,96 @@ export default function CompetitorList({ competitors, competitorIntents }: Compe
                 </p>
               )}
 
+              {/* Competitor Structural & Media Assets Metrics */}
+              {item.metrics && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexWrap: 'wrap',
+                    paddingTop: '8px',
+                    borderTop: '1px solid var(--border-color)',
+                    marginTop: '8px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: 'var(--muted-text)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      marginRight: '2px',
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="3" y1="9" x2="21" y2="9"></line>
+                      <line x1="9" y1="21" x2="9" y2="9"></line>
+                    </svg>
+                    Assets:
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: 'var(--text-color)',
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--border-color)',
+                      padding: '2px 7px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {item.metrics.h1Count} H1 • {item.metrics.h2Count} H2
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: item.metrics.imageCount > 0 ? 'var(--text-color)' : 'var(--muted-text)',
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--border-color)',
+                      padding: '2px 7px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    🖼️ {item.metrics.imageCount} {item.metrics.imageCount === 1 ? 'img' : 'imgs'}
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: item.metrics.videoCount > 0 ? '#1a776f' : 'var(--muted-text)',
+                      background: item.metrics.videoCount > 0 ? 'rgba(40, 167, 156, 0.1)' : 'var(--card-bg)',
+                      border: item.metrics.videoCount > 0 ? '1px solid rgba(40, 167, 156, 0.3)' : '1px solid var(--border-color)',
+                      padding: '2px 7px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    🎥 {item.metrics.videoCount} {item.metrics.videoCount === 1 ? 'vid' : 'vids'}
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: item.metrics.hasTableOfContents ? '#16a34a' : 'var(--muted-text)',
+                      background: item.metrics.hasTableOfContents ? 'rgba(22, 163, 74, 0.08)' : 'var(--card-bg)',
+                      border: item.metrics.hasTableOfContents ? '1px solid rgba(22, 163, 74, 0.25)' : '1px solid var(--border-color)',
+                      padding: '2px 7px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    📑 {item.metrics.hasTableOfContents ? 'TOC' : 'No TOC'}
+                  </span>
+                </div>
+              )}
+
               {/* Competitor Schema Types */}
               <div
                 style={{
@@ -168,8 +258,8 @@ export default function CompetitorList({ competitors, competitorIntents }: Compe
                   alignItems: 'center',
                   gap: '6px',
                   flexWrap: 'wrap',
-                  paddingTop: '8px',
-                  borderTop: '1px solid var(--border-color)',
+                  paddingTop: '6px',
+                  borderTop: item.metrics ? 'none' : '1px solid var(--border-color)',
                   marginTop: '4px',
                 }}
               >
