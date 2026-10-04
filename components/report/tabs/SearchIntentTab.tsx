@@ -175,7 +175,7 @@ export default function SearchIntentTab({ analysis }: { analysis: AnalysisResult
                 }}
               >
                 <GoogleIcon name="track_changes" size={14} color="var(--accent-color)" />
-                <span>Highest ranking format pattern</span>
+                <span>Highest Ranking Format</span>
               </div>
             </div>
           </div>
