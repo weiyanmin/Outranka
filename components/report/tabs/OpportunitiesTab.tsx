@@ -113,20 +113,18 @@ export default function OpportunitiesTab({ analysis }: { analysis: AnalysisResul
                   }}
                 >
                   <div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '8px',
-                        marginBottom: '10px',
-                      }}
-                    >
+                    <div style={{ marginBottom: '10px' }}>
                       <a
                         href={schemaUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ textDecoration: 'none' }}
+                        style={{
+                          display: 'inline-flex',
+                          textDecoration: 'none',
+                          transition: 'opacity 0.15s ease',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.82')}
+                        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                         title={`View ${sch.type} specifications on schema.org`}
                       >
                         <Pill tone="accent">
@@ -139,31 +137,6 @@ export default function OpportunitiesTab({ analysis }: { analysis: AnalysisResul
                             </svg>
                           </span>
                         </Pill>
-                      </a>
-
-                      <a
-                        href={schemaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '0.78rem',
-                          color: 'var(--accent-color)',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-                        onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-                        title={`Open ${schemaUrl} in new tab`}
-                      >
-                        <span>schema.org</span>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                          <polyline points="15 3 21 3 21 9"></polyline>
-                          <line x1="10" y1="14" x2="21" y2="3"></line>
-                        </svg>
                       </a>
                     </div>
 
