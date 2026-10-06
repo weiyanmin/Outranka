@@ -106,7 +106,7 @@ export default function RelatedKeywordsCard({ relatedSearches = [], peopleAlsoAs
                 e.currentTarget.style.color = 'var(--text-color)';
               }}
             >
-              <GoogleIcon name="search" size={14} color="currentColor" />
+              <GoogleIcon name="search_round" size={14} color="currentColor" />
               <span>{item.query}</span>
             </a>
           ))}

@@ -225,7 +225,7 @@ export default function AuditsPage() {
         {!loading && !error && audits.length > 0 && (
           <div className="audit-history-filters" aria-label="Filter past audits">
             <label className="audit-history-search">
-              <GoogleIcon name="search" size={17} color="var(--muted-text)" />
+              <GoogleIcon name="search_round" size={17} color="var(--muted-text)" />
               <span className="sr-only">Search audits</span>
               <input
                 type="search"
@@ -261,7 +261,7 @@ export default function AuditsPage() {
 
         {!loading && !error && audits.length > 0 && filteredAudits.length === 0 && (
           <section className="audit-history-empty audit-history-filter-empty">
-            <GoogleIcon name="search" size={34} color="var(--accent-color)" />
+            <GoogleIcon name="search_round" size={34} color="var(--accent-color)" />
             <h2>No matching audits</h2>
             <p>Try a different search or date range.</p>
           </section>
