@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../../lib/supabase/client';
 
 export default function AccountControl() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const accountControlRef = useRef<HTMLDivElement>(null);
+  const avatarButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     try {
@@ -20,6 +23,29 @@ export default function AccountControl() {
       return;
     }
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (accountControlRef.current && !accountControlRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        avatarButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   const signOut = async () => {
     if (!window.confirm('Are you sure you want to sign out?')) return;
@@ -35,9 +61,25 @@ export default function AccountControl() {
   if (!email) return null;
 
   return (
-    <div className="account-control">
-      <span title={email}>{email}</span>
-      <button type="button" onClick={signOut}>Sign out</button>
+    <div className="account-control" ref={accountControlRef}>
+      <button
+        ref={avatarButtonRef}
+        className="account-avatar"
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-label={`Account menu for ${email}`}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        title={email}
+      >
+        {email.trim().charAt(0).toUpperCase()}
+      </button>
+      {isOpen && (
+        <div className="account-popover">
+          <span className="account-email">{email}</span>
+          <button className="account-signout" type="button" onClick={signOut}>Sign out</button>
+        </div>
+      )}
     </div>
   );
 }

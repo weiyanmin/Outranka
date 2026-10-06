@@ -47,6 +47,20 @@ export interface SerpFetchResult {
   peopleAlsoAsk: PeopleAlsoAskItem[];
 }
 
+function queriesMatch(returnedQuery: unknown, requestedQuery: string): boolean {
+  return typeof returnedQuery !== 'string' ||
+    returnedQuery.trim().toLocaleLowerCase() === requestedQuery.trim().toLocaleLowerCase();
+}
+
+function validateSearchResponse(data: any, requestedQuery: string) {
+  if (data.search_metadata?.status === 'Error' || data.error) {
+    throw new Error('The search provider could not complete this query. Please try again.');
+  }
+  if (!queriesMatch(data.search_parameters?.q, requestedQuery)) {
+    throw new Error('The search provider returned results for a different query. No audit was generated.');
+  }
+}
+
 export async function fetchTop10Results(keyword: string, location: string): Promise<SerpFetchResult> {
   const apiKey = process.env.SERPAPI_API_KEY;
   if (!apiKey) {
@@ -74,53 +88,8 @@ export async function fetchTop10Results(keyword: string, location: string): Prom
   }
 
   const data = await response.json();
-  const organicResults: any[] = Array.isArray(data.organic_results) ? [...data.organic_results] : [];
-
-  // Google/SerpApi can return fewer organic listings than the requested `num`.
-  // If the first page is short, continue from the next organic-result offset
-  // and fill the remaining slots rather than silently reporting (for example) 9.
-  if (organicResults.length > 0 && organicResults.length < 10) {
-    try {
-      const nextPageUrl = new URL('https://serpapi.com/search.json');
-      nextPageUrl.searchParams.set('engine', 'google');
-      nextPageUrl.searchParams.set('q', keyword);
-      nextPageUrl.searchParams.set('num', '10');
-      nextPageUrl.searchParams.set('start', String(organicResults.length));
-      nextPageUrl.searchParams.set('api_key', apiKey);
-
-      if (location && location.toLowerCase() !== 'global') {
-        nextPageUrl.searchParams.set('gl', location.toLowerCase());
-      }
-
-      const nextPageResponse = await fetch(nextPageUrl.toString(), {
-        headers: { Accept: 'application/json' },
-        cache: 'no-store',
-      });
-
-      if (nextPageResponse.ok) {
-        const nextPageData = await nextPageResponse.json();
-        const nextOrganicResults: any[] = Array.isArray(nextPageData.organic_results)
-          ? nextPageData.organic_results
-          : [];
-        const seenResults = new Set(
-          organicResults.map((item) => String(item.link || '').trim().toLowerCase().replace(/\/$/, ''))
-        );
-
-        for (const item of nextOrganicResults) {
-          const resultKey = String(item.link || '').trim().toLowerCase().replace(/\/$/, '');
-          if (resultKey && !seenResults.has(resultKey)) {
-            organicResults.push(item);
-            seenResults.add(resultKey);
-          }
-          if (organicResults.length >= 10) break;
-        }
-      }
-    } catch (error) {
-      // Keep the first-page results if pagination fails; never fail an audit
-      // just because the optional attempt to fill the list was unavailable.
-      console.warn('Could not retrieve additional organic SERP results.', error);
-    }
-  }
+  validateSearchResponse(data, keyword);
+  const organicResults: any[] = Array.isArray(data.organic_results) ? data.organic_results : [];
 
   const competitors: SerpResultItem[] = organicResults.slice(0, 10).map((item, index) => ({
     position: item.position || index + 1,

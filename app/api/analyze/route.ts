@@ -12,9 +12,23 @@ import { evaluateLanguageAlignment } from '../../../lib/language';
 import { calculateOverallPerformance } from '../../../lib/performanceScore';
 import { createClient } from '../../../lib/supabase/server';
 import { evaluateEeatSignals } from '../../../lib/eeat';
+import type { AnalysisProgressStep } from '../../../lib/analysisProgress';
 
-export async function POST(req: NextRequest) {
+type ProgressReporter = (step: AnalysisProgressStep) => void;
+
+async function analyzeRequest(req: NextRequest, reportProgress: ProgressReporter) {
   try {
+    // Route Handlers must enforce authorization themselves; Proxy is only an
+    // optimistic gate and should not be the sole protection for costly work.
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required.' },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const { keyword, location, inputType, content, url } = body;
 
@@ -24,6 +38,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    reportProgress('source');
 
     // Determine user content and extract deterministic metrics
     let userTextContent = '';
@@ -60,6 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 1: Fetch top 10 search results and Google AI Overview
+    reportProgress('serp');
     const serpData = await fetchTop10Results(keyword.trim(), location || 'global');
     const { competitors, aiOverview } = serpData;
 
@@ -71,6 +88,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 2: Read competitor web pages in parallel
+    reportProgress('competitors');
     const competitorFetches = competitors.map(async (c) => {
       try {
         const pageData = await readWebPage(c.link, false);
@@ -107,6 +125,7 @@ export async function POST(req: NextRequest) {
     const competitorPages = await Promise.all(competitorFetches);
 
     // Step 3: Run AI analysis via Gemini
+    reportProgress('gemini');
     const analysis = await analyzeContentWithGemini(
       keyword.trim(),
       location || 'global',
@@ -116,6 +135,7 @@ export async function POST(req: NextRequest) {
 
     // Step 4: Perform deterministic UI, UX, Scannability and Assets check
     const competitorMetricsList = competitorPages.map((cp) => cp.content.metrics);
+    reportProgress('scoring');
     const scannabilityAudit = evaluateScannabilityAndStructure(userMetrics, competitorMetricsList);
     analysis.scannabilityAudit = scannabilityAudit;
     analysis.eeatAudit = evaluateEeatSignals(userTextContent);
@@ -168,11 +188,8 @@ export async function POST(req: NextRequest) {
 
     let auditId: string | null = null;
     let persistenceWarning: string | null = null;
+    reportProgress('saving');
     try {
-      const supabase = await createClient();
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw userError || new Error('No authenticated user found.');
-
       const { data: savedAudit, error: saveError } = await supabase
         .from('audits')
         .insert({
@@ -213,4 +230,50 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function POST(req: NextRequest) {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      let closed = false;
+      const send = (event: unknown) => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+        } catch {
+          closed = true;
+        }
+      };
+      const close = () => {
+        if (closed) return;
+        closed = true;
+        try {
+          controller.close();
+        } catch {
+          // The client may have navigated away while the audit was running.
+        }
+      };
+
+      void analyzeRequest(req, (step) => send({ type: 'progress', step }))
+        .then(async (response) => {
+          send({ type: 'result', payload: await response.json() });
+          close();
+        })
+        .catch(() => {
+          send({
+            type: 'result',
+            payload: { success: false, error: 'An unexpected error occurred during analysis.' },
+          });
+          close();
+        });
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+    },
+  });
 }

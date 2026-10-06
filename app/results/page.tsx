@@ -10,6 +10,7 @@ import { AnalysisResult } from '../../lib/analyze';
 import { SerpResultItem } from '../../lib/serp';
 import { downloadAnalysisMarkdown, downloadAnalysisPdf } from '../../lib/downloadReport';
 import { findSiteRankings } from '../../lib/rankingMatch';
+import { createClient } from '../../lib/supabase/client';
 
 export default function ResultsPage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -26,6 +27,7 @@ export default function ResultsPage() {
   const [pdfDownloadError, setPdfDownloadError] = useState('');
   const [persistenceWarning, setPersistenceWarning] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const markedAuditIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     try {
@@ -50,6 +52,29 @@ export default function ResultsPage() {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (isLoading || !analysis || !query) return;
+
+    const auditId = sessionStorage.getItem('outranka_audit_id');
+    if (!auditId || markedAuditIdRef.current === auditId) return;
+    markedAuditIdRef.current = auditId;
+
+    try {
+      localStorage.setItem('outranka_last_visited_audit', auditId);
+    } catch {
+      // The database marker below can still persist the last-visited audit.
+    }
+
+    void createClient()
+      .rpc('mark_audit_viewed', { target_audit_id: auditId })
+      .then(({ error: visitError }) => {
+        if (visitError) console.warn('Could not update the last-visited audit marker.', visitError);
+      })
+      .catch((visitError) => {
+        console.warn('Could not update the last-visited audit marker.', visitError);
+      });
+  }, [analysis, isLoading, query]);
 
   // Close dropdown on outside click or Escape key
   useEffect(() => {

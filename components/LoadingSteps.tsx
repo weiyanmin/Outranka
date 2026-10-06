@@ -1,97 +1,49 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import GoogleIcon from './GoogleIcon';
+import { ANALYSIS_PROGRESS_STEPS } from '../lib/analysisProgress';
+import type { AnalysisProgressStep } from '../lib/analysisProgress';
 
 interface LoadingStepsProps {
   keyword: string;
+  currentStep: AnalysisProgressStep;
 }
 
-const STEPS = [
-  { title: 'Fetching Top 10 Google Results', desc: 'Querying SerpAPI for regional rankings and competitor URLs...' },
-  { title: 'Crawling Competitor Content & Schema', desc: 'Reading competitor body text, heading tags, and JSON-LD schema...' },
-  { title: 'Auditing 4-Intent Relevance', desc: 'Benchmarking Informational, Commercial, Transactional, Navigational parity...' },
-  { title: 'Comparing with Top 3 Market Leaders', desc: 'Applying top-3 relevance weighting and detecting topic gaps...' },
-  { title: 'Finalizing Scoring & Gap Breakdown', desc: 'Generating priority recommendations and suggested structure...' },
-];
-
-export default function LoadingSteps({ keyword }: LoadingStepsProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentStep((prev) => (prev < STEPS.length - 1 ? prev + 1 : prev));
-    }, 2400);
-    return () => clearInterval(timer);
-  }, []);
+export default function LoadingSteps({ keyword, currentStep }: LoadingStepsProps) {
+  const currentStepIndex = ANALYSIS_PROGRESS_STEPS.findIndex((step) => step.id === currentStep);
 
   return (
-    <div className="card" style={{ marginTop: '24px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+    <div className="card audit-progress-card" style={{ marginTop: '24px' }}>
+      <div className="audit-progress-heading">
         <div className="badge-pill">
           <GoogleIcon name="progress_activity" size={13} color="currentColor" className="icon-spin" /> In Progress
         </div>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-color)' }}>
-          Auditing &quot;{keyword}&quot;
-        </h3>
-        <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', marginTop: '4px' }}>
-          Comparing your content against the live top 10 search landscape
-        </p>
+        <h3>Auditing &quot;{keyword}&quot;</h3>
+        <p>We’ll keep you updated as each part of the audit finishes.</p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {STEPS.map((step, idx) => {
-          const isDone = idx < currentStep;
-          const isCurrent = idx === currentStep;
+      <div className="audit-progress-steps" aria-label="Audit progress">
+        {ANALYSIS_PROGRESS_STEPS.map((step, idx) => {
+          const isDone = idx < currentStepIndex;
+          const isCurrent = idx === currentStepIndex;
 
           return (
             <div
-              key={idx}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '14px',
-                padding: '12px 14px',
-                background: isCurrent ? 'var(--accent-light)' : '#fafafc',
-                border: isCurrent ? '1px solid var(--accent-color)' : '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-md)',
-                transition: 'all 0.3s ease',
-              }}
+              key={step.id}
+              className={`audit-progress-step${isCurrent ? ' is-current' : ''}${isDone ? ' is-done' : ''}`}
+              aria-current={isCurrent ? 'step' : undefined}
             >
-              <div
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  flexShrink: 0,
-                  marginTop: '1px',
-                  background: isDone ? 'var(--accent-color)' : isCurrent ? '#ffffff' : '#e2e8f0',
-                  color: isDone ? '#ffffff' : isCurrent ? 'var(--accent-color)' : 'var(--muted-text)',
-                  border: isCurrent ? '2px solid var(--accent-color)' : 'none',
-                }}
-              >
+              <div className="audit-progress-step-marker" aria-hidden="true">
                 {isDone ? <GoogleIcon name="check" size={13} color="#ffffff" /> : idx + 1}
               </div>
-
-              <div>
-                <div
-                  style={{
-                    fontSize: '0.9rem',
-                    fontWeight: isCurrent ? 700 : 600,
-                    color: isCurrent ? 'var(--accent-color)' : isDone ? 'var(--text-color)' : 'var(--muted-text)',
-                  }}
-                >
+              <div className="audit-progress-step-copy">
+                <div className="audit-progress-step-title" aria-live={isCurrent ? 'polite' : undefined}>
                   {step.title}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--muted-text)', marginTop: '2px', lineHeight: 1.35 }}>
-                  {step.desc}
-                </div>
+                <div className="audit-progress-step-description">{step.description}</div>
               </div>
+              {isCurrent && <div className="audit-step-loader" role="status" aria-label={`${step.title} in progress`} />}
             </div>
           );
         })}

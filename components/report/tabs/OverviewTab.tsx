@@ -87,7 +87,7 @@ export default function OverviewTab({ analysis, perf, onNavigate }: OverviewTabP
         <div className="callout callout-warning">
           <GoogleIcon name="warning" size={22} color="#b45309" />
           <div className="callout-body">
-            <strong>Search Intent Mismatch Detected</strong>
+            <strong>Page Format Mismatch Detected</strong>
           </div>
           <button type="button" className="link-btn" onClick={() => onNavigate('intent')}>
             View details <GoogleIcon name="arrow_forward" size={14} color="currentColor" />

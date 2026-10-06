@@ -8,16 +8,19 @@ import LoadingSteps from '../components/LoadingSteps';
 import GoogleIcon from '../components/GoogleIcon';
 import BrandMark from '../components/BrandMark';
 import AccountControl from '../components/auth/AccountControl';
+import type { AnalysisProgressStep } from '../lib/analysisProgress';
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [activeKeyword, setActiveKeyword] = useState('');
+  const [progressStep, setProgressStep] = useState<AnalysisProgressStep>('source');
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: FormSubmitData) => {
     setIsLoading(true);
     setActiveKeyword(data.keyword);
+    setProgressStep('source');
     setError(null);
 
     try {
@@ -27,15 +30,42 @@ export default function Home() {
         body: JSON.stringify(data),
       });
 
-      const result = await res.json();
-      if (!res.ok || !result.success) {
-        throw new Error(result.error || 'Failed to fetch search results.');
+      if (!res.body) throw new Error('Could not read analysis progress. Please try again.');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let result: any = null;
+
+      const handleEvent = (line: string) => {
+        if (!line.trim()) return;
+        const event = JSON.parse(line);
+        if (event.type === 'progress' && typeof event.step === 'string') {
+          setProgressStep(event.step as AnalysisProgressStep);
+        } else if (event.type === 'result') {
+          result = event.payload;
+        }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        lines.forEach(handleEvent);
+        if (done) break;
+      }
+      if (buffer.trim()) handleEvent(buffer);
+
+      if (!result?.success) {
+        throw new Error(result?.error || 'Failed to fetch search results.');
       }
 
       // Store in sessionStorage for /results route
       sessionStorage.setItem('outranka_analysis', JSON.stringify(result.analysis));
       sessionStorage.setItem('outranka_competitors', JSON.stringify(result.competitors));
       if (result.auditId) sessionStorage.setItem('outranka_audit_id', result.auditId);
+      else sessionStorage.removeItem('outranka_audit_id');
       if (result.persistenceWarning) {
         sessionStorage.setItem('outranka_audit_save_warning', result.persistenceWarning);
       } else {
@@ -101,7 +131,7 @@ export default function Home() {
         </header>
 
         {isLoading ? (
-          <div id="new-audit"><LoadingSteps keyword={activeKeyword} /></div>
+          <div id="new-audit"><LoadingSteps keyword={activeKeyword} currentStep={progressStep} /></div>
         ) : (
           <div id="new-audit"><InputForm onSubmit={handleSubmit} isLoading={isLoading} /></div>
         )}

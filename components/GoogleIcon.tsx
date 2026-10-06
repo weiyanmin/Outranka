@@ -26,6 +26,7 @@ export type GoogleIconName =
   | 'arrow_back'
   | 'arrow_forward'
   | 'description'
+  | 'delete'
   | 'open_in_new'
   | 'picture_as_pdf'
   | 'progress_activity'
@@ -84,6 +85,8 @@ const ICON_PATHS: Record<GoogleIconName, string> = {
   arrow_forward: "M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z",
   description:
     "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm1 16H7v-2h8v2zm0-4H7v-2h8v2zm-2-5V3.5L18.5 9H13z",
+  delete:
+    "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
   open_in_new:
     "M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59L7.76 14.83l1.41 1.41L19 6.41V10h2V3h-7z",
   picture_as_pdf:
